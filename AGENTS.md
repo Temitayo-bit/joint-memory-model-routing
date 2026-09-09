@@ -18,6 +18,13 @@ Start with text-based, reproducible experiments. Add voice only after the contro
 - Do not commit credentials, API keys, Supabase URLs with secrets, dataset access tokens, `.env` files, model weights, audio recordings, or personally identifiable conversations.
 - Use synthetic or consented data only. Do not put real personal conversations in the research database or benchmark artifacts.
 
+## CodeRabbit-informed quality and security rules
+
+- A design spec is never exempt from fact-checking: follow `.agents/skills/design-research/` for every change under `docs/specs/`, including a documentation-only spec. The same applies to documentation that introduces or changes an external architecture, API, pricing, or security claim.
+- Pin every third-party GitHub Action to a reviewed, full-length immutable commit SHA. Do not use mutable tags such as `@v4` in workflows.
+- In this public repository, credential scanning must cover all tracked paths, including `docs/` and `.agents/`. A scanner must use quiet matching and must never print a possible secret or its matching line into CI logs. Exclude only a narrowly scoped, explicitly redacted example when necessary.
+- A build/CI gate that claims to validate an architectural boundary must directly test the relevant contract (for example, controller, durable-memory, and transient-compute rules). A non-empty file check or unrelated phrase match is not sufficient.
+
 ## Mandatory GPU cost rule
 
 **A RunPod server must be terminated when it is not actively being used.** Before ending any GPU session: save/push code, export required non-sensitive experiment outputs, verify durable data is in Supabase or another approved backup, then terminate the pod. Do not leave a pod running for convenience, background work, or an unspecified future session.

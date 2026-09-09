@@ -21,7 +21,7 @@ Before writing any `docs/specs/<date>-<slug>-design.md`.
 
 - **Fact-check and component inventory: always.** Every spec, no exceptions. Small tickets make factual claims too.
 - **Diagram: when the change spans two or more systems, or introduces a new boundary** — a new service, vendor, data flow, or external dependency. Decide this *after* Step 3, not from the opening description; tickets routinely turn out to have more moving parts than they looked like.
-- **Skip entirely** for docs-only and config-only changes.
+- **Skip entirely** only for documentation and configuration changes that do not create or modify a design spec and do not introduce or change external architecture, API, pricing, or security claims. A design spec is never exempt from this workflow.
 
 ## Step 1 — Fact-check
 
