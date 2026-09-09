@@ -64,6 +64,6 @@ Use a 24 GB GPU for normal integration and evaluation work. Use 48 GB only for a
 ## Commands
 
 - `make test` — validates the repository foundation and required research/operations documents.
-- `make build` — runs the repository build gate; until application code is scaffolded, it validates the documented architecture and deployment boundaries.
+- `make build` — runs the repository build gate; until application code is scaffolded, it validates the documented architecture and deployment contract, not unimplemented runtime behavior.
 
 When application code is added, replace these foundation checks with its real lint, typecheck, unit-test, integration-test, and build commands while retaining the same CI job names.
