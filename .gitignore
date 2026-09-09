@@ -1,0 +1,45 @@
+# Credentials and machine-specific configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python and JavaScript build artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+dist/
+build/
+.next/
+
+# Research artifacts that must be stored through an approved data workflow
+data/raw/
+data/private/
+artifacts/
+models/
+audio/
+*.gguf
+
+# Operating system/editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Locally downloaded RunPod CLI binary
+tools/runpodctl
+
+# Vendor-maintained skills are installed locally; source and exact hashes are
+# recorded in skills-lock.json. Keep only this project's custom workflows in Git.
+.agents/skills/autofix/
+.agents/skills/code-review/
+.agents/skills/companion-clis/
+.agents/skills/flash/
+.agents/skills/runpod/
+.agents/skills/runpod-mcp/
+.agents/skills/runpod-migrate/
+.agents/skills/runpod-templates/
+.agents/skills/runpod-usage/
+.agents/skills/runpodctl/

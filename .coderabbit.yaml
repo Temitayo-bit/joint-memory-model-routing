@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Public-repository review policy. CodeRabbit also automatically reads AGENTS.md.
+
+inheritance: false
+
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  review_status: true
+  review_details: true
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 0
+  tools:
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+
+# Do not give a public research repository external MCP context. If an MCP
+# integration is ever needed, it must be scoped, documented, and approved
+# separately before being enabled here.
+knowledge_base:
+  mcp:
+    usage: disabled
