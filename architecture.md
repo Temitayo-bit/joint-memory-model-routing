@@ -24,6 +24,7 @@ Browser/client -> application API -> controller -> self-hosted model server (Run
 - **Local development:** controller, API, UI, tests, synthetic fixtures, and basic integration testing. No rented GPU is needed.
 - **Supabase free tier:** durable structured memory and vectors, subject to its free-tier limits and network latency. The external database round trip is a deployment limitation to measure and report separately from model inference.
 - **RunPod:** temporary, self-configured GPU compute for real model inference, planned experiments, rehearsals, and demos. A pod is terminated after active use. Its local disk is not durable storage.
+- **RunPod Network Volume:** optional retained storage, created in the same region as the Pod, for non-sensitive model weights, container caches, and repeatable server setup. On 2026-09-09, the RunPod console showed **$0.07 per GB/month** (10 GB = **$0.70/month**). It survives Pod termination and continues to be billed, so it is deleted when no longer useful. Recheck the console price and region availability before creating one. It does not replace Supabase for durable research memory or GitHub/approved storage for required artifacts.
 - **GitHub:** source code, non-sensitive experiment configurations, aggregate results, documentation, and CI evidence.
 
 ## Deliberate non-goals for the first milestone

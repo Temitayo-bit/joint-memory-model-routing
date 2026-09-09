@@ -13,13 +13,16 @@ Start with text-based, reproducible experiments. Add voice only after the contro
 - This is a **public** research repository. Treat every committed file, pull-request diff, issue, GitHub Actions log, and release artifact as publicly visible.
 - Never invent experimental results, costs, latency measurements, benchmark outcomes, citations, or advisor feedback.
 - Preserve reproducibility: version datasets, record configuration and random seeds, and save non-sensitive experiment summaries outside temporary GPUs.
-- Treat Supabase as the durable memory store. A RunPod pod and its local disk are disposable compute, never the sole location of required code, logs, results, or memory.
+- Treat Supabase as the durable research-memory store. A RunPod pod and its local disk are disposable compute, never the sole location of required code, logs, results, or memory.
+- A RunPod **Network Volume** may be retained separately from a pod for non-sensitive model weights, container caches, and server setup. It is not the research memory store and is never the sole location for required code, logs, results, or data. The current storage decision and price note live in `architecture.md`; the operational checklist is `docs/operations/runpod-session-runbook.md`.
 - Do not commit credentials, API keys, Supabase URLs with secrets, dataset access tokens, `.env` files, model weights, audio recordings, or personally identifiable conversations.
 - Use synthetic or consented data only. Do not put real personal conversations in the research database or benchmark artifacts.
 
 ## Mandatory GPU cost rule
 
-**A RunPod server must be terminated when it is not actively being used.** Before ending any GPU session: save/push code, export required non-sensitive experiment outputs, verify durable data is in Supabase or another approved backup, then terminate the pod and delete attached pod storage when it is not intentionally being retained. Do not leave a pod running for convenience, background work, or an unspecified future session.
+**A RunPod server must be terminated when it is not actively being used.** Before ending any GPU session: save/push code, export required non-sensitive experiment outputs, verify durable data is in Supabase or another approved backup, then terminate the pod. Do not leave a pod running for convenience, background work, or an unspecified future session.
+
+Delete attached pod storage at shutdown. A deliberately retained Network Volume is the narrow exception: it may remain while it avoids repeated model/setup downloads, but it still incurs storage charges after the GPU is terminated. Record why it is retained and delete it when that reason ends.
 
 Use a 24 GB GPU for normal integration and evaluation work. Use 48 GB only for a planned larger-model condition. Keep a per-session cost record in `docs/operations/gpu-session-log.md` and stay within the user’s $75 semester cap.
 
