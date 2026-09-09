@@ -14,6 +14,8 @@ required_files=(
   docs/README.md
   docs/operations/runpod-session-runbook.md
   docs/operations/gpu-session-log.md
+  docs/specs/2026-09-09-vercel-supabase-runpod-deployment-design.md
+  docs/design/diagrams/2026-09-09-vercel-supabase-runpod.svg
   docs/research/evaluation-protocol.md
   .github/pull_request_template.md
 )
@@ -22,7 +24,7 @@ for file in "${required_files[@]}"; do
   [[ -s "$file" ]] || { echo "Missing required file: $file" >&2; exit 1; }
 done
 
-credential_pattern='(SUPABASE[_]SERVICE_ROLE_KEY|RUNPOD[_]API_KEY|ghp_[A-Za-z0-9]{20,}|github[_]pat_)'
+credential_pattern='(SUPABASE[_](SERVICE_ROLE_KEY|SECRET_KEY)|RUNPOD[_](API_KEY|INFERENCE_TOKEN)|sb[_]secret_|ghp_[A-Za-z0-9]{20,}|github[_]pat_)'
 if git grep -q -E "$credential_pattern"; then
   echo "Potential credential found in tracked content." >&2
   exit 1
@@ -34,7 +36,9 @@ if [[ "$mode" == "build" ]]; then
     'small model without long-term-memory retrieval;'
     'retrieve relevant long-term memory, then use the small model; or'
     'retrieve relevant long-term memory and use a larger model.'
-    '**Supabase free tier:** durable structured memory and vectors'
+    'Browser/client --JWT request--> Supabase Edge Function (controller) -> RunPod model server'
+    '**Vercel:** hosts the public Next.js web application'
+    '**Supabase free tier:** Supabase Auth, durable structured memory and vectors'
     '**RunPod:** temporary, self-configured GPU compute'
     'A pod is terminated after active use. Its local disk is not durable storage.'
   )
@@ -58,6 +62,29 @@ if [[ "$mode" == "build" ]]; then
   for requirement in "${required_shutdown_contract[@]}"; do
     grep -Fq "$requirement" docs/operations/runpod-session-runbook.md || {
       echo "Shutdown contract requirement missing." >&2
+      exit 1
+    }
+  done
+
+  required_deployment_security_contract=(
+    '![Deployment boundary](../design/diagrams/2026-09-09-vercel-supabase-runpod.svg)'
+    'Vercel holds only public client configuration'
+    'The RunPod proxy URL and inference credential belong only in Supabase Edge Function secrets.'
+    'model server must reject requests without its inference token.'
+    'The Edge Function must require a signed-in user and use RLS-scoped database access.'
+    'Service-role access is not used for ordinary user requests.'
+    'request-size limits, payload validation, and per-token rate limiting'
+    "withSupabase({ auth: 'user' })"
+    'browser invokes the Edge Function directly'
+    'without retry loops or data loss'
+    'authenticated `/healthz` check succeed'
+    'The initial HTTP-proxy request budget is 75 seconds'
+    'show a clear service-unavailable message'
+  )
+
+  for requirement in "${required_deployment_security_contract[@]}"; do
+    grep -Fq "$requirement" docs/specs/2026-09-09-vercel-supabase-runpod-deployment-design.md architecture.md AGENTS.md || {
+      echo "Deployment security contract requirement missing." >&2
       exit 1
     }
   done
