@@ -1,0 +1,64 @@
+{
+  "questions": [
+    {
+      "id": "Q01",
+      "category": "memory_answerable",
+      "text": "What tea does the Northriver Lab prefer?"
+    },
+    {
+      "id": "Q02",
+      "category": "memory_answerable",
+      "text": "When and where is the Northriver weekly standup?"
+    },
+    {
+      "id": "Q03",
+      "category": "memory_answerable",
+      "text": "What is the synthetic project code name used by Northriver?"
+    },
+    {
+      "id": "Q04",
+      "category": "memory_answerable",
+      "text": "Who is the faculty advisor of record for the Northriver synthetic persona?"
+    },
+    {
+      "id": "Q05",
+      "category": "general_knowledge",
+      "text": "What is the chemical formula for water?"
+    },
+    {
+      "id": "Q06",
+      "category": "general_knowledge",
+      "text": "Which planet in the solar system is commonly called the Red Planet?"
+    },
+    {
+      "id": "Q07",
+      "category": "general_knowledge",
+      "text": "In what year did the Apollo 11 moon landing occur?"
+    },
+    {
+      "id": "Q08",
+      "category": "general_knowledge",
+      "text": "What is the capital city of Japan?"
+    },
+    {
+      "id": "Q09",
+      "category": "memory_and_general",
+      "text": "Which language does the Northriver harness use, and is that language typically compiled ahead of time or run by an interpreter?"
+    },
+    {
+      "id": "Q10",
+      "category": "memory_and_general",
+      "text": "What semester GPU budget cap does Northriver record, and is that amount a hardware purchase or an operating budget?"
+    },
+    {
+      "id": "Q11",
+      "category": "memory_and_general",
+      "text": "Northriver stores facts and source passages as memory. What is the difference between those two item kinds, and what is a vector embedding used for in retrieval generally?"
+    },
+    {
+      "id": "Q12",
+      "category": "memory_and_general",
+      "text": "Northriver prefers 24 GB GPUs for ordinary evaluation. How does 24 GB compare with a common 8 GB consumer GPU, as a multiple of memory capacity?"
+    }
+  ]
+}

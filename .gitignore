@@ -15,7 +15,9 @@ dist/
 build/
 .next/
 
-# Research artifacts that must be stored through an approved data workflow
+# Locally generated experiment outputs
+experiments/text_baseline/runs/
+experiments/text_baseline/outputs/
 data/raw/
 data/private/
 artifacts/

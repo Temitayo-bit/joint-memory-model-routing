@@ -6,7 +6,9 @@ This project investigates a controller that jointly decides when to retrieve lon
 
 ## Current status
 
-Repository foundation only. The initial implementation is deliberately text-first and local-first. No experimental result should be inferred from this repository until an experiment protocol and saved result are added.
+Text-baseline harness is in tree for fixed conditions S0, S1, L0, and L1. Mock and export modes are local-only. A supervised one-request live path is prepared in SQL and an Edge Function and is **not** deployed. No experimental result should be inferred from mock, fixture, or unmeasured output.
+
+See [the text-baseline design](docs/specs/2026-09-11-text-baseline-harness-design.md) and [the harness README](experiments/text_baseline/README.md).
 
 ## Development and quality gates
 

@@ -1,0 +1,10 @@
+{
+  "documentation_only": true,
+  "not_measured": true,
+  "currency": "USD",
+  "note": "Rates stay null until a dated primary source is recorded. Do not copy these fields into actual rental spending.",
+  "S0": { "input_per_million": null, "output_per_million": null },
+  "S1": { "input_per_million": null, "output_per_million": null },
+  "L0": { "input_per_million": null, "output_per_million": null },
+  "L1": { "input_per_million": null, "output_per_million": null }
+}

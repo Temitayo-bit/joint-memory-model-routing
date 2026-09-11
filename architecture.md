@@ -1,6 +1,6 @@
 # Architecture: Joint Memory and Model Routing
 
-Last updated: 2026-09-09
+Last updated: 2026-09-11
 
 ## Research boundary
 
@@ -41,13 +41,22 @@ The full, source-checked deployment decision is in [the Vercel–Supabase–RunP
 
 ## Evaluation baseline
 
-The initial comparison should include no-memory and always-small/always-large baselines before joint adaptation. Candidate later conditions include fixed-threshold routing, no-memory-signal routing, joint adaptive routing, and an oracle analysis. Record quality, retrieval relevance, end-to-end latency, model-generation latency, retrieval latency, escalation rate, and cost.
+Fixed baselines are established **before** any dynamic controller, in this order:
+
+1. Text: S0 (small, no memory), S1 (small, memory), L0 (large, no memory), L1 (large, memory).
+2. Voice: the same four conditions on the voice pipeline.
+3. Controller design.
+4. Controller evaluation for text and then voice.
+
+The initial comparison therefore includes no-memory and always-small/always-large baselines before joint adaptation. L0 is required so a large model without retrieval is measured rather than assumed. Candidate later conditions include fixed-threshold routing, no-memory-signal routing, joint adaptive routing, and an oracle analysis. Record quality, retrieval relevance, end-to-end latency, model-generation latency, retrieval latency, escalation rate, and cost. Keep market-priced generation estimates, allocated processing cost, and actual rental/service spending as three separate fields; never treat one as another.
+
+The local text harness and the prepared (undeployed) one-request live path are specified in [the text-baseline design](docs/specs/2026-09-11-text-baseline-harness-design.md). Mock and fixture output is not a research result.
 
 ## Open decisions
 
-- Exact small and large open-weight models and quantization formats.
-- Supabase `pgvector` schema, retrieval configuration, and RLS policy design.
-- Benchmark subset and scoring method.
+- Exact small and large open-weight models, revisions, and quantization formats for live inference.
+- Production (non-pilot) memory schema beyond the supervised text-baseline snapshot in the 2026-09-11 spec.
+- Public benchmark subset and human/automatic scoring method for later controller evaluation.
 - Authenticated/private demo boundary and consent process for any live voice testing.
 
 Each decision must be fact-checked and recorded in a dated specification before implementation.

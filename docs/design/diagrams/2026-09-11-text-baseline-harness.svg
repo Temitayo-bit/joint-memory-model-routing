@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+<title id="title">Text-baseline harness and supervised one-request live path</title>
+<desc id="desc">Local mock and export stay on the laptop. The supervised live path sends only an allow-listed JSON body and user JWT to a Supabase Edge Function. Durable snapshot rows stay in Supabase. One non-streaming model HTTP call is transient. Scoring anchors never cross a trust boundary into a prompt.</desc>
+<style>
+  text{font-family:Arial,sans-serif;fill:#172033}
+  .z{fill:#f8fafc;stroke:#94a3b8;stroke-width:2;stroke-dasharray:7 5}
+  .c{stroke:#334155;stroke-width:2}
+  .h{font-size:18px;font-weight:bold}
+  .b{font-size:13px}
+  .s{font-size:12px;fill:#475569}
+  .q{stroke:#2563eb;stroke-width:3;fill:none;marker-end:url(#a)}
+  .r{stroke:#059669;stroke-width:3;fill:none;marker-end:url(#g)}
+  .x{stroke:#b45309;stroke-width:2;fill:none;stroke-dasharray:4 4}
+</style>
+<defs>
+  <marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+  <marker id="g" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#059669"/></marker>
+</defs>
+<rect width="1280" height="720" fill="white"/>
+<text x="32" y="40" class="h" font-size="24">Fixed text baselines S0/S1/L0/L1  local harness and prepared live path</text>
+<text x="32" y="64" class="s">Blue: request payload. Green: retained or returned result. Amber: never sent to the model. No controller and no voice pipeline.</text>
+
+<rect x="28" y="84" width="360" height="560" class="z"/>
+<text x="44" y="114" class="h">Laptop / local workspace</text>
+<text x="44" y="136" class="s">Transient compute. Not the research memory store.</text>
+<rect x="48" y="156" width="320" height="88" class="c" fill="#f1f5f9" rx="12"/>
+<text x="64" y="184" class="h">Harness (Python)</text>
+<text x="64" y="208" class="b">mock / export / import · 48 cells</text>
+<text x="64" y="228" class="s">S0/L0 skip retrieval; S1aL1 evidence</text>
+<rect x="48" y="260" width="150" height="70" class="c" fill="#f1f5f9" rx="10"/>
+<text x="60" y="288" class="b">questions.json</text>
+<text x="60" y="310" class="s">+ memory fixtures</text>
+<rect x="214" y="260" width="154" height="70" class="c" fill="#fff7ed" rx="10"/>
+<text x="226" y="288" class="b">scoring_anchors</text>
+<text x="226" y="310" class="s">never in prompts</text>
+<rect x="48" y="350" width="320" height="88" class="c" fill="#f1f5f9" rx="12"/>
+<text x="64" y="378" class="h">Live client (prepared)</text>
+<text x="64" y="402" class="b">JWT + request/snapshot UUID</text>
+<text x="64" y="422" class="s">question, condition, 384-d unit vector</text>
+<rect x="48" y="456" width="320" height="70" class="c" fill="#eef2ff" rx="10"/>
+<text x="64" y="484" class="b">Local lexical retrieval</text>
+<text x="64" y="506" class="s">Plumbing validation only  not semantic IR</text>
+<text x="44" y="556" class="s">Retained locally: hashed manifests if the operator</text>
+<text x="44" y="574" class="s">exports them. Discarded: JWTs, mock answers.</text>
+<text x="44" y="606" class="s">Rejected on the wire: model URL, bearer, prompts,</text>
+<text x="44" y="624" class="s">owner_id, reference answers, generation settings.</text>
+
+<rect x="420" y="84" width="430" height="560" class="z"/>
+<text x="436" y="114" class="h">Supabase (durable)</text>
+<text x="436" y="136" class="s">Owner RLS. Invoker RPCs with search_path=''.</text>
+<rect x="440" y="160" width="180" height="90" class="c" fill="#ecfdf5" rx="12"/>
+<text x="456" y="192" class="h">Auth</text>
+<text x="456" y="216" class="b">application-user JWT</text>
+<text x="456" y="234" class="s">allowlist + deadline</text>
+<rect x="640" y="160" width="190" height="90" class="c" fill="#ecfdf5" rx="12"/>
+<text x="656" y="192" class="h">Edge Function</text>
+<text x="656" y="216" class="b">text-baseline-pilot</text>
+<text x="656" y="234" class="s">verify_jwt · auth=user</text>
+<rect x="440" y="280" width="390" height="110" class="c" fill="#ecfdf5" rx="12"/>
+<text x="456" y="312" class="h">Immutable pilot snapshot</text>
+<text x="456" y="336" class="b">facts + source passages + vector(384)</text>
+<text x="456" y="356" class="s">S0/L0: ownership check only, no content read</text>
+<text x="456" y="376" class="s">S1/L1: lexical rank + cosine similarity</text>
+<rect x="440" y="410" width="390" height="100" class="c" fill="#ecfdf5" rx="12"/>
+<text x="456" y="442" class="h">Result row</text>
+<text x="456" y="466" class="b">insert pending before billed HTTP</text>
+<text x="456" y="486" class="s">atomic update ’ success or sanitized failure</text>
+<text x="456" y="506" class="s">no raw upstream error body retained</text>
+<text x="436" y="548" class="s">Retained: snapshot, allowlist, pending/final result,</text>
+<text x="436" y="566" class="s">retrieval/model/gateway timings, measured tokens only.</text>
+<text x="436" y="598" class="s">Transient: Edge request, prompt assembly, JWT.</text>
+<text x="436" y="616" class="s">first_token_ms is null (non-streaming).</text>
+
+<rect x="882" y="84" width="370" height="560" class="z"/>
+<text x="898" y="114" class="h">Model server (transient)</text>
+<text x="898" y="136" class="s">Not provisioned by this change. Terminate after use.</text>
+<rect x="902" y="168" width="330" height="130" class="c" fill="#fff7ed" rx="12"/>
+<text x="918" y="204" class="h">Self-hosted HTTP API</text>
+<text x="918" y="232" class="b">aliases small / large from server env</text>
+<text x="918" y="256" class="b">one request · redirect=error</text>
+<text x="918" y="278" class="s">no automatic retry</text>
+<rect x="902" y="320" width="330" height="130" class="c" fill="#fff7ed" rx="12"/>
+<text x="918" y="352" class="h">Fixed generation</text>
+<text x="918" y="376" class="b">non-thinking · max 256 tokens</text>
+<text x="918" y="396" class="b">T=0.7 · top_p=0.8 · top_k=20 · seed=42</text>
+<text x="918" y="424" class="s">IDs, revision, quant, bearer stay server-side</text>
+<text x="898" y="490" class="s">Retained here: nothing required. Local disk is not</text>
+<text x="898" y="508" class="s">the research store. Prompt/context are transient.</text>
+<text x="898" y="540" class="s">Returned: answer text; token usage only if the</text>
+<text x="898" y="558" class="s">server includes it. Redirects are failures.</text>
+<text x="898" y="590" class="s">Mock/export modes never open this connection.</text>
+
+<path d="M368 200H440" class="x"/>
+<text x="318" y="192" class="s">anchors stay</text>
+<path d="M368 394H640" class="q"/>
+<text x="470" y="386" class="s">JWT + allow-listed JSON only</text>
+<path d="M830 205H902" class="q"/>
+<text x="834" y="196" class="s">prompt+token</text>
+<path d="M902 280H830" class="r"/>
+<text x="834" y="300" class="s">answer+usage?</text>
+<path d="M640 250V280" class="q"/>
+<text x="652" y="272" class="s">RPC</text>
+<path d="M640 380V410" class="r"/>
+<text x="652" y="402" class="s">write</text>
+<text x="32" y="672" class="s">Costs stay three distinct nulls unless measured: (1) market estimate from tokens×documented rates, (2) allocated processing cost, (3) actual rental/service spend including setup, idle, memory prep, storage, later speech.</text>
+<text x="32" y="696" class="s">This diagram prepares the live path; it does not authorize deploying the function, applying migrations, creating users, or starting a GPU.</text>
+</svg>

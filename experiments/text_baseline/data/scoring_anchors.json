@@ -1,0 +1,53 @@
+{
+  "not_for_prompts": true,
+  "anchors": {
+    "Q01": {
+      "expected_answer": "jasmine green tea",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q01"]
+    },
+    "Q02": {
+      "expected_answer": "Tuesday at 10:15 in room B-12",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q02"]
+    },
+    "Q03": {
+      "expected_answer": "Cedar Compass",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q03"]
+    },
+    "Q04": {
+      "expected_answer": "Professor I. N. Vitro",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q04"]
+    },
+    "Q05": {
+      "expected_answer": "H2O",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q05"]
+    },
+    "Q06": {
+      "expected_answer": "Mars",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q06"]
+    },
+    "Q07": {
+      "expected_answer": "1969",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q07"]
+    },
+    "Q08": {
+      "expected_answer": "Tokyo",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q08"]
+    },
+    "Q09": {
+      "expected_answer": "Python, interpreted",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q09"]
+    },
+    "Q10": {
+      "expected_answer": "75 US dollars, operating budget",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q10"]
+    },
+    "Q11": {
+      "expected_answer": "A fact is a short attested statement; a source passage is the supporting excerpt; embeddings rank semantically similar text.",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q11"]
+    },
+    "Q12": {
+      "expected_answer": "24 GB is three times 8 GB",
+      "must_not_appear_in_prompts": ["SCORING-ANCHOR-Q12"]
+    }
+  }
+}

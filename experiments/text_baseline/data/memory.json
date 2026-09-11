@@ -1,0 +1,66 @@
+{
+  "snapshot_label": "synthetic-northriver-pilot-v1",
+  "persona": "Fictional Northriver Lab handbook. Not a real person or conversation.",
+  "items": [
+    {
+      "id": "M01",
+      "kind": "fact",
+      "content": "The Northriver Lab preferred tea is jasmine green tea."
+    },
+    {
+      "id": "M02",
+      "kind": "fact",
+      "content": "The Northriver weekly standup is Tuesday at 10:15 in room B-12."
+    },
+    {
+      "id": "M03",
+      "kind": "fact",
+      "content": "The synthetic project code name is Cedar Compass."
+    },
+    {
+      "id": "M04",
+      "kind": "fact",
+      "content": "The faculty advisor of record for this synthetic persona is Professor I. N. Vitro."
+    },
+    {
+      "id": "M05",
+      "kind": "fact",
+      "content": "The local experiment harness for this project is written in Python."
+    },
+    {
+      "id": "M06",
+      "kind": "fact",
+      "content": "The Northriver GPU evaluation budget cap recorded in the lab handbook is 75 US dollars for the semester."
+    },
+    {
+      "id": "M07",
+      "kind": "fact",
+      "content": "Northriver operators prefer a 24 GB GPU for ordinary evaluation sessions."
+    },
+    {
+      "id": "P01",
+      "kind": "source_passage",
+      "content": "Northriver lab handbook, beverages: keep a tin of jasmine green tea next to the kettle. Do not assume visitors drink coffee."
+    },
+    {
+      "id": "P02",
+      "kind": "source_passage",
+      "content": "Northriver lab handbook, calendar: standup remains Tuesday 10:15, room B-12, unless the room sheet is updated in writing."
+    },
+    {
+      "id": "P03",
+      "kind": "source_passage",
+      "content": "Northriver lab handbook, naming: the Cedar Compass code name is internal and synthetic. It is not a deployed product name."
+    },
+    {
+      "id": "P04",
+      "kind": "source_passage",
+      "content": "Northriver lab handbook, memory: store durable facts and source passages together. A fact is a short attested statement. A source passage is the supporting excerpt."
+    },
+    {
+      "id": "P05",
+      "kind": "source_passage",
+      "content": "Northriver lab handbook, compute: prefer 24 GB cards for ordinary runs; 48 GB only for a planned larger-model condition. Record session spend separately from token-price estimates."
+    }
+  ]
+}
