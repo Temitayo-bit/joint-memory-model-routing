@@ -36,6 +36,8 @@ Use a 24 GB GPU for normal integration and evaluation work. Use 48 GB only for a
 
 ## Planning and implementation workflow
 
+Codex is the planning and coordination agent. When implementation, debugging, test writing or test fixing, code review, or another task that should be delegated is ready, Codex gives the user a complete, copy-ready prompt for Cursor with the full task context. The user manually sends that prompt to Cursor. Cursor performs the implementation and review work. Codex must not launch Cursor, implement or review code in parallel, or substitute Codex subagents unless the user explicitly overrides this workflow.
+
 1. For a change involving external services, data flow, pricing, or architecture, use `.agents/skills/design-research/` before writing its spec. Verify time-sensitive claims from primary sources.
 2. Write a dated spec in `docs/specs/`, then an executable one-time plan in `docs/plans/`.
 3. Implement in a feature branch. Every change, including docs and configuration, is submitted as a pull request; never push directly to `main`.
