@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from experiments.text_baseline.embeddings import build_embedding_bundle
+from experiments.text_baseline.embeddings import DEFAULT_MODEL_REVISION, build_embedding_bundle
 from experiments.text_baseline.fixtures import DATA_DIR
 from experiments.text_baseline.hashing import canonical_json
 from experiments.text_baseline.import_responses import import_responses, load_json
@@ -66,12 +66,6 @@ def cmd_import(args: argparse.Namespace) -> int:
     return 0
 
 
-def _optional_ints(values: Optional[List[str]]) -> Optional[List[int]]:
-    if values is None:
-        return None
-    return [int(value) for value in values]
-
-
 def cmd_run_live(args: argparse.Namespace) -> int:
     requests_payload = load_json(Path(args.requests))
     requests = requests_payload.get("requests")
@@ -83,7 +77,7 @@ def cmd_run_live(args: argparse.Namespace) -> int:
         transport=args.transport,
         conditions=args.condition,
         question_ids=args.question_id,
-        repeats=_optional_ints(args.repeat),
+        repeats=args.repeat,
         max_requests=args.max_requests,
         hourly_rate_usd=args.hourly_rate,
         timeout_s=args.timeout_s,
@@ -92,6 +86,8 @@ def cmd_run_live(args: argparse.Namespace) -> int:
         pod_id=args.pod_id,
         gpu_type=args.gpu_type,
         model_revision=args.model_revision,
+        small_model_revision=args.small_model_revision,
+        large_model_revision=args.large_model_revision,
         quantization=args.quantization,
         server_version=args.server_version,
         snapshot_id=args.snapshot_id,
@@ -106,7 +102,11 @@ def cmd_run_live(args: argparse.Namespace) -> int:
 
 
 def cmd_prepare_embeddings(args: argparse.Namespace) -> int:
-    bundle = build_embedding_bundle(Path(args.data_dir), model_id=args.model_id)
+    bundle = build_embedding_bundle(
+        Path(args.data_dir),
+        model_id=args.model_id,
+        model_revision=args.model_revision,
+    )
     output = Path(args.output)
     if output.exists() and output.is_dir():
         path = output / "embeddings-bundle.json"
@@ -173,7 +173,7 @@ def build_parser() -> argparse.ArgumentParser:
     live.add_argument("--transport", choices=("direct", "edge"), default="direct")
     live.add_argument("--condition", action="append", dest="condition")
     live.add_argument("--question-id", action="append", dest="question_id")
-    live.add_argument("--repeat", action="append", dest="repeat")
+    live.add_argument("--repeat", action="append", dest="repeat", type=int)
     live.add_argument("--max-requests", type=int)
     live.add_argument("--hourly-rate", type=float, help="USD/hour used for active-inference processing cost")
     live.add_argument("--timeout-s", type=float, default=70.0)
@@ -181,7 +181,9 @@ def build_parser() -> argparse.ArgumentParser:
     live.add_argument("--session-id")
     live.add_argument("--pod-id")
     live.add_argument("--gpu-type")
-    live.add_argument("--model-revision")
+    live.add_argument("--model-revision", help="Deprecated single revision; prefer --small/--large-model-revision")
+    live.add_argument("--small-model-revision")
+    live.add_argument("--large-model-revision")
     live.add_argument("--quantization")
     live.add_argument("--server-version")
     live.add_argument("--snapshot-id", help="Required for --transport edge")
@@ -195,6 +197,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     embeds.add_argument("--output", required=True)
     embeds.add_argument("--model-id", default="sentence-transformers/all-MiniLM-L6-v2")
+    embeds.add_argument("--model-revision", default=DEFAULT_MODEL_REVISION)
     embeds.set_defaults(func=cmd_prepare_embeddings)
 
     launch = sub.add_parser(

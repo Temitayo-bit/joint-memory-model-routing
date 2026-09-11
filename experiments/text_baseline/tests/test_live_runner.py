@@ -9,9 +9,9 @@ from typing import Any, List, Mapping
 from unittest import mock
 
 from experiments.text_baseline.costs import active_inference_processing_cost
-from experiments.text_baseline.embeddings import build_embedding_bundle
+from experiments.text_baseline.embeddings import DEFAULT_MODEL_REVISION, build_embedding_bundle
 from experiments.text_baseline.fixtures import DATA_DIR
-from experiments.text_baseline.http_util import HttpTransportError, redact_secrets
+from experiments.text_baseline.http_util import HttpTransportError, _read_bounded, post_json, redact_secrets
 from experiments.text_baseline.import_responses import import_responses
 from experiments.text_baseline.live_runner import (
     MODEL_BEARER_ENV,
@@ -20,12 +20,14 @@ from experiments.text_baseline.live_runner import (
     SMALL_MODEL_ID_ENV,
     EDGE_URL_ENV,
     USER_JWT_ENV,
+    LiveRunnerError,
     call_direct_model,
     filter_requests,
     run_live,
+    stable_edge_request_id,
 )
 from experiments.text_baseline.run_builder import build_requests
-from experiments.text_baseline.runpod_launch import PINNED_MODELS, launch_bundle
+from experiments.text_baseline.runpod_launch import PINNED_MODELS, VLLM_IMAGE, launch_bundle
 
 
 def _fake_encoder(texts):
@@ -35,6 +37,24 @@ def _fake_encoder(texts):
         values[index % 384] = 1.0
         vectors.append(values)
     return vectors
+
+
+class _FakeResponse:
+    def __init__(self, payload: bytes, headers=None):
+        self._payload = payload
+        self._offset = 0
+        self.headers = headers or {}
+
+    def read(self, size: int = -1):
+        if self._offset >= len(self._payload):
+            return b""
+        if size < 0:
+            chunk = self._payload[self._offset :]
+            self._offset = len(self._payload)
+            return chunk
+        chunk = self._payload[self._offset : self._offset + size]
+        self._offset += len(chunk)
+        return chunk
 
 
 class LiveRunnerOfflineTests(unittest.TestCase):
@@ -93,6 +113,8 @@ class LiveRunnerOfflineTests(unittest.TestCase):
     def test_max_requests_rejects_zero(self) -> None:
         with self.assertRaisesRegex(Exception, "max_requests"):
             filter_requests(self.requests, max_requests=0)
+
+    def test_resume_skips_completed_and_appends(self) -> None:
         sample = [row for row in self.requests if row["condition"] == "S0"][:2]
         calls: List[Mapping[str, Any]] = []
 
@@ -138,6 +160,30 @@ class LiveRunnerOfflineTests(unittest.TestCase):
             digests = [row["request_sha256"] for row in second["responses"]]
             self.assertEqual(len(set(digests)), 2)
             self.assertTrue((out / "responses.json").exists())
+
+    def test_no_resume_refuses_existing_checkpoint(self) -> None:
+        sample = [row for row in self.requests if row["condition"] == "S0"][:1]
+
+        def post(*_args, **_kwargs):
+            return (
+                200,
+                {"choices": [{"message": {"content": "ok"}}], "usage": {"prompt_tokens": 1, "completion_tokens": 1}},
+                5.0,
+                b"{}",
+            )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "protected"
+            env = {
+                MODEL_BASE_URL_ENV: "https://model.example.invalid",
+                MODEL_BEARER_ENV: "secret-bearer-token",
+                SMALL_MODEL_ID_ENV: "small-model",
+                LARGE_MODEL_ID_ENV: "large-model",
+            }
+            with mock.patch.dict("os.environ", env, clear=False):
+                run_live(sample, out, transport="direct", hourly_rate_usd=0.5, post=post)
+                with self.assertRaises(LiveRunnerError):
+                    run_live(sample, out, transport="direct", hourly_rate_usd=0.5, post=post, resume=False)
 
     def test_timeout_and_failure_capture(self) -> None:
         sample = self.requests[0]
@@ -197,6 +243,21 @@ class LiveRunnerOfflineTests(unittest.TestCase):
         )
         self.assertEqual(row["failure_code"], "response_too_large")
 
+    def test_http_util_rejects_negative_limits_and_bounds_reads(self) -> None:
+        with self.assertRaises(HttpTransportError):
+            post_json(
+                "https://example.invalid/v1",
+                {},
+                {},
+                timeout_s=1,
+                max_response_bytes=0,
+            )
+        oversized = _FakeResponse(b"x" * 20)
+        with self.assertRaises(HttpTransportError):
+            _read_bounded(oversized, 8)
+        ok = _FakeResponse(b'{"ok":true}')
+        self.assertEqual(_read_bounded(ok, 64), b'{"ok":true}')
+
     def test_secret_redaction(self) -> None:
         text = "authorization Bearer super-secret-value and again super-secret-value"
         redacted = redact_secrets(text, {"TOKEN": "super-secret-value"})
@@ -234,7 +295,7 @@ class LiveRunnerOfflineTests(unittest.TestCase):
                     gpu_type="RTX 3090",
                     session_id="sess-1",
                     pod_id="pod-1",
-                    model_revision="rev",
+                    small_model_revision="74d4bd2bd4bff9cafc9345221320bffb08b406a3",
                     quantization="awq",
                     server_version="vllm-0.29.0",
                     post=post,
@@ -248,10 +309,27 @@ class LiveRunnerOfflineTests(unittest.TestCase):
             session = result["session"]
             self.assertEqual(session["gpu_type"], "RTX 3090")
             self.assertEqual(session["hourly_rate_usd"], 0.5)
+            self.assertEqual(
+                session["small_model_revision"],
+                "74d4bd2bd4bff9cafc9345221320bffb08b406a3",
+            )
             self.assertIsNone(session["session_actuals"]["rental_and_service_spend"])
             # Session total spend stays in session metadata only.
             session["session_actuals"]["rental_and_service_spend"] = 0.1292403981
             (out / "session.json").write_text(json.dumps(session), encoding="utf-8")
+            with mock.patch.dict("os.environ", env, clear=False):
+                resumed = run_live(
+                    [sample],
+                    out,
+                    transport="direct",
+                    hourly_rate_usd=0.5,
+                    post=post,
+                    resume=True,
+                )
+            self.assertEqual(
+                resumed["session"]["session_actuals"]["rental_and_service_spend"],
+                0.1292403981,
+            )
             imported = import_responses(
                 self.bundle,
                 {"responses": result["responses"]},
@@ -296,9 +374,10 @@ class LiveRunnerOfflineTests(unittest.TestCase):
         self.assertEqual(body["seed"], 42)
         self.assertEqual(body["chat_template_kwargs"]["enable_thinking"], False)
 
-    def test_edge_transport_uses_allowlisted_body(self) -> None:
+    def test_edge_transport_parses_flat_handler_contract(self) -> None:
         sample = [row for row in self.requests if row["condition"] == "S0"][0]
         captured = {}
+        server_evidence = "a" * 64
 
         def post(url, body, headers, **_kwargs):
             captured["url"] = url
@@ -307,9 +386,17 @@ class LiveRunnerOfflineTests(unittest.TestCase):
             return (
                 200,
                 {
+                    "request_id": body["request_id"],
+                    "status": "success",
+                    "condition": "S0",
                     "answer_text": "edge-answer",
-                    "latency_ms": {"model_http": 11.0, "retrieval": 0.0, "gateway": 1.0},
-                    "tokens": {"input": 2, "output": 3, "source": "model_server"},
+                    "retrieval_ms": 0.0,
+                    "model_http_ms": 11.0,
+                    "gateway_ms": 1.0,
+                    "first_token_ms": None,
+                    "input_tokens": 2,
+                    "output_tokens": 3,
+                    "evidence_sha256": server_evidence,
                 },
                 15.0,
                 b"{}",
@@ -331,14 +418,26 @@ class LiveRunnerOfflineTests(unittest.TestCase):
                     post=post,
                 )
             self.assertEqual(set(captured["body"]), {"request_id", "snapshot_id", "question", "condition"})
+            self.assertEqual(captured["body"]["request_id"], stable_edge_request_id(sample["request_sha256"]))
             self.assertNotIn("messages", captured["body"])
             self.assertNotIn("model", captured["body"])
-            self.assertEqual(result["responses"][0]["status"], "success")
+            response = result["responses"][0]
+            self.assertEqual(response["status"], "success")
+            self.assertEqual(response["evidence_source"], "edge")
+            self.assertEqual(response["evidence_sha256"], server_evidence)
+            self.assertEqual(response["exported_evidence_sha256"], sample["evidence_sha256"])
+            self.assertEqual(response["latency_ms"]["model_http"], 11.0)
+            self.assertAlmostEqual(response["costs"]["allocated_processing_cost"], 11.0 / 3_600_000 * 0.5)
             self.assertNotIn("user-jwt-secret", (out / "responses.json").read_text(encoding="utf-8"))
+            imported = import_responses(self.bundle, {"responses": result["responses"]})
+            matched = [row for row in imported["records"] if row["request_sha256"] == sample["request_sha256"]][0]
+            self.assertEqual(matched["evidence_sha256"], server_evidence)
+            self.assertEqual(matched["evidence_source"], "edge")
 
     def test_embedding_bundle_offline(self) -> None:
         bundle = build_embedding_bundle(DATA_DIR, encode_fn=_fake_encoder)
         self.assertEqual(bundle["dims"], 384)
+        self.assertEqual(bundle["model_revision"], DEFAULT_MODEL_REVISION)
         self.assertEqual(len(bundle["items"]), len(json.loads((DATA_DIR / "memory.json").read_text())["items"]))
         self.assertEqual(len(bundle["questions"]), 12)
         for row in bundle["items"] + bundle["questions"]:
@@ -348,10 +447,14 @@ class LiveRunnerOfflineTests(unittest.TestCase):
     def test_runpod_launch_pins_revisions_and_settings(self) -> None:
         small = launch_bundle("small")
         large = launch_bundle("large")
-        self.assertEqual(small["image"], "vllm/vllm-openai:v0.29.0")
-        self.assertIn("--generation-config vllm", small["runpod_start_command"])
+        self.assertEqual(small["image"], VLLM_IMAGE)
+        self.assertTrue(small["image"].startswith("vllm/vllm-openai@sha256:"))
+        self.assertIn("--generation-config", small["runpod_start_command"])
+        self.assertIn("vllm", small["runpod_start_command"])
         self.assertIn(PINNED_MODELS["small"]["revision"], small["runpod_start_command"])
         self.assertIn(PINNED_MODELS["large"]["revision"], large["runpod_start_command"])
+        hostile = launch_bundle("small", host="0.0.0.0;injected")
+        self.assertIn("'0.0.0.0;injected'", hostile["docker_run_command"])
         self.assertEqual(small["fixed_generation"]["seed"], 42)
         self.assertTrue(small["not_executed"])
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import time
 import uuid
@@ -128,6 +129,8 @@ def success_response(
     retrieval_ms: Optional[float] = None,
     gateway_ms: Optional[float] = None,
     client_ms: Optional[float] = None,
+    evidence_sha256: Optional[str] = None,
+    evidence_source: str = "exported",
 ) -> Dict[str, Any]:
     latency = empty_latency()
     latency["retrieval"] = retrieval_ms
@@ -136,7 +139,7 @@ def success_response(
     latency["first_token"] = None
     latency["gateway"] = gateway_ms
     latency["client"] = client_ms
-    return {
+    row = {
         "request_sha256": request["request_sha256"],
         "question_id": request["question_id"],
         "condition": request["condition"],
@@ -144,7 +147,8 @@ def success_response(
         "status": "success",
         "answer_text": answer_text,
         "failure_code": None,
-        "evidence_sha256": request["evidence_sha256"],
+        "evidence_sha256": evidence_sha256 if evidence_sha256 is not None else request["evidence_sha256"],
+        "evidence_source": evidence_source,
         "latency_ms": latency,
         "tokens": dict(tokens),
         "quality": None,
@@ -154,6 +158,9 @@ def success_response(
             "actual_rental_and_service_spend": None,
         },
     }
+    if evidence_source == "edge":
+        row["exported_evidence_sha256"] = request["evidence_sha256"]
+    return row
 
 
 def failed_response(
@@ -163,12 +170,14 @@ def failed_response(
     model_http_ms: Optional[float] = None,
     end_to_end_ms: Optional[float] = None,
     hourly_rate_usd: Optional[float] = None,
+    evidence_sha256: Optional[str] = None,
+    evidence_source: str = "exported",
 ) -> Dict[str, Any]:
     latency = empty_latency()
     latency["model_http"] = model_http_ms
     latency["end_to_end"] = end_to_end_ms
     latency["first_token"] = None
-    return {
+    row = {
         "request_sha256": request["request_sha256"],
         "question_id": request["question_id"],
         "condition": request["condition"],
@@ -176,7 +185,8 @@ def failed_response(
         "status": "failed",
         "answer_text": None,
         "failure_code": failure_code,
-        "evidence_sha256": request["evidence_sha256"],
+        "evidence_sha256": evidence_sha256 if evidence_sha256 is not None else request["evidence_sha256"],
+        "evidence_source": evidence_source,
         "latency_ms": latency,
         "tokens": {"input": None, "output": None, "source": None},
         "quality": None,
@@ -186,6 +196,64 @@ def failed_response(
             "allocated_processing_cost": _processing_cost(model_http_ms, hourly_rate_usd),
             "actual_rental_and_service_spend": None,
         },
+    }
+    if evidence_source == "edge":
+        row["exported_evidence_sha256"] = request["evidence_sha256"]
+    return row
+
+
+def stable_edge_request_id(request_sha256: str) -> str:
+    """Deterministic UUID so resume cannot double-bill the Edge Function."""
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, "text-baseline-edge:%s" % request_sha256))
+
+
+def _optional_ms(value: Any) -> Optional[float]:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if not math.isfinite(float(value)) or float(value) < 0:
+        return None
+    return float(value)
+
+
+def _optional_token_count(value: Any) -> Optional[int]:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return None
+    return value
+
+
+def parse_edge_success_payload(payload: Mapping[str, Any]) -> Dict[str, Any]:
+    """Normalize the Edge Function success body (flat fields from handler.ts)."""
+    answer = payload.get("answer_text")
+    if not isinstance(answer, str) or not answer:
+        raise LiveRunnerError("edge response missing answer_text")
+    model_http = _optional_ms(payload.get("model_http_ms"))
+    if model_http is None:
+        # Accept nested shape only as a secondary compatibility path.
+        latency = payload.get("latency_ms")
+        if isinstance(latency, Mapping):
+            model_http = _optional_ms(latency.get("model_http"))
+    retrieval = _optional_ms(payload.get("retrieval_ms"))
+    gateway = _optional_ms(payload.get("gateway_ms"))
+    input_tokens = _optional_token_count(payload.get("input_tokens"))
+    output_tokens = _optional_token_count(payload.get("output_tokens"))
+    if input_tokens is None and output_tokens is None:
+        nested_tokens = payload.get("tokens")
+        if isinstance(nested_tokens, Mapping) and nested_tokens.get("source") == "model_server":
+            input_tokens = _optional_token_count(nested_tokens.get("input"))
+            output_tokens = _optional_token_count(nested_tokens.get("output"))
+    evidence = payload.get("evidence_sha256")
+    if not isinstance(evidence, str) or not evidence:
+        raise LiveRunnerError("edge response missing evidence_sha256")
+    tokens = {"input": input_tokens, "output": output_tokens, "source": None}
+    if input_tokens is not None or output_tokens is not None:
+        tokens["source"] = "model_server"
+    return {
+        "answer_text": answer,
+        "model_http_ms": model_http,
+        "retrieval_ms": retrieval,
+        "gateway_ms": gateway,
+        "tokens": tokens,
+        "evidence_sha256": evidence,
     }
 
 
@@ -202,6 +270,8 @@ def build_session_metadata(
     pod_id: Optional[str],
     small_model_id: Optional[str] = None,
     large_model_id: Optional[str] = None,
+    small_model_revision: Optional[str] = None,
+    large_model_revision: Optional[str] = None,
 ) -> Dict[str, Any]:
     actuals = dict(session_actuals_template())
     return {
@@ -214,6 +284,8 @@ def build_session_metadata(
         "small_model_id": small_model_id,
         "large_model_id": large_model_id,
         "model_revision": model_revision,
+        "small_model_revision": small_model_revision,
+        "large_model_revision": large_model_revision,
         "quantization": quantization,
         "server_version": server_version,
         "fixed_generation": dict(FIXED_GENERATION),
@@ -351,7 +423,7 @@ def call_edge_function(
     hourly_rate_usd: Optional[float],
     post: PostFn = post_json,
 ) -> Dict[str, Any]:
-    request_id = str(uuid.uuid4())
+    request_id = stable_edge_request_id(str(request["request_sha256"]))
     try:
         body = build_live_request(
             request_id,
@@ -360,8 +432,8 @@ def call_edge_function(
             request["condition"],
             embedding=embedding,
         )
-    except LiveClientError as exc:
-        return failed_response(request, failure_code="invalid_edge_payload")
+    except LiveClientError:
+        return failed_response(request, failure_code="invalid_edge_payload", evidence_source="edge")
     secrets = {USER_JWT_ENV: user_jwt}
     headers = {
         "authorization": "Bearer %s" % user_jwt,
@@ -369,7 +441,7 @@ def call_edge_function(
     }
     wall_started = time.perf_counter()
     try:
-        status, payload, http_ms, _raw = post(
+        status, payload, _http_ms, _raw = post(
             edge_url,
             body,
             headers,
@@ -383,68 +455,44 @@ def call_edge_function(
             request,
             failure_code=exc.failure_code,
             end_to_end_ms=end_ms,
+            evidence_source="edge",
         )
     end_ms = (time.perf_counter() - wall_started) * 1000.0
     if status >= 300 and status < 400:
         return failed_response(
             request,
             failure_code="redirect_rejected",
-            model_http_ms=http_ms,
             end_to_end_ms=end_ms,
+            evidence_source="edge",
         )
     if status < 200 or status >= 300:
         return failed_response(
             request,
             failure_code="edge_http_error",
-            model_http_ms=http_ms,
             end_to_end_ms=end_ms,
+            evidence_source="edge",
         )
-    answer = payload.get("answer_text") or payload.get("answer") or payload.get("text")
-    if not isinstance(answer, str) or not answer:
-        # Edge may nest the answer under result/data.
-        for key in ("result", "data"):
-            nested = payload.get(key)
-            if isinstance(nested, Mapping):
-                candidate = nested.get("answer_text") or nested.get("answer") or nested.get("text")
-                if isinstance(candidate, str) and candidate:
-                    answer = candidate
-                    payload = nested
-                    break
-    if not isinstance(answer, str) or not answer:
+    try:
+        parsed = parse_edge_success_payload(payload)
+    except LiveRunnerError:
         return failed_response(
             request,
             failure_code="missing_answer_text",
-            model_http_ms=http_ms,
             end_to_end_ms=end_ms,
+            evidence_source="edge",
         )
-    latency = payload.get("latency_ms") if isinstance(payload.get("latency_ms"), Mapping) else {}
-    model_http_raw = latency.get("model_http")
-    model_http: Optional[float]
-    if isinstance(model_http_raw, (int, float)) and not isinstance(model_http_raw, bool):
-        model_http = float(model_http_raw)
-    else:
-        # Do not substitute client wall-clock for model HTTP; that would overstate GPU cost.
-        model_http = None
-    tokens = payload.get("tokens")
-    if isinstance(tokens, Mapping) and tokens.get("source") == "model_server":
-        token_block = {
-            "input": tokens.get("input"),
-            "output": tokens.get("output"),
-            "source": "model_server",
-        }
-    else:
-        usage = payload.get("usage")
-        token_block = _token_pair(usage)
     return success_response(
         request,
-        answer_text=answer,
-        model_http_ms=model_http,
+        answer_text=parsed["answer_text"],
+        model_http_ms=parsed["model_http_ms"],
         end_to_end_ms=end_ms,
-        tokens=token_block,
+        tokens=parsed["tokens"],
         hourly_rate_usd=hourly_rate_usd,
-        retrieval_ms=latency.get("retrieval") if isinstance(latency.get("retrieval"), (int, float)) else None,
-        gateway_ms=latency.get("gateway") if isinstance(latency.get("gateway"), (int, float)) else None,
+        retrieval_ms=parsed["retrieval_ms"],
+        gateway_ms=parsed["gateway_ms"],
         client_ms=end_ms,
+        evidence_sha256=parsed["evidence_sha256"],
+        evidence_source="edge",
     )
 
 
@@ -464,9 +512,62 @@ def load_embedding_lookup(path: Optional[Path]) -> Dict[str, List[float]]:
                 continue
             key = row.get("id") or row.get("question_id")
             embedding = row.get("embedding")
-            if isinstance(key, str) and isinstance(embedding, list):
+            if not isinstance(key, str) or not isinstance(embedding, list):
+                continue
+            try:
                 lookup[key] = [float(value) for value in embedding]
+            except (TypeError, ValueError) as exc:
+                raise LiveRunnerError("embedding for %s contains non-numeric values" % key) from exc
     return lookup
+
+
+def _merge_session_actuals(
+    base: Mapping[str, Any],
+    checkpoint_actuals: Any,
+    session_path: Path,
+    *,
+    resume: bool,
+) -> Dict[str, Any]:
+    merged = dict(base)
+    if isinstance(checkpoint_actuals, dict):
+        merged.update(checkpoint_actuals)
+    if resume and session_path.exists():
+        try:
+            prior_session = json.loads(session_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            prior_session = {}
+        prior_actuals = prior_session.get("session_actuals") if isinstance(prior_session, dict) else None
+        if isinstance(prior_actuals, dict):
+            for key, value in prior_actuals.items():
+                if value is not None:
+                    merged[key] = value
+    return merged
+
+
+def validate_request_rows(requests: Sequence[Any]) -> None:
+    required = {
+        "request_sha256",
+        "question_id",
+        "condition",
+        "repeat_index",
+        "evidence_sha256",
+        "messages",
+        "question_text",
+    }
+    for index, row in enumerate(requests):
+        if not isinstance(row, dict):
+            raise LiveRunnerError("requests[%d] must be an object" % index)
+        missing = sorted(required - set(row))
+        if missing:
+            raise LiveRunnerError("requests[%d] is missing required fields: %s" % (index, missing))
+        messages = row.get("messages")
+        if not isinstance(messages, list) or not messages:
+            raise LiveRunnerError("requests[%d].messages must be a non-empty list" % index)
+        for message_index, message in enumerate(messages):
+            if not isinstance(message, dict) or "role" not in message or "content" not in message:
+                raise LiveRunnerError(
+                    "requests[%d].messages[%d] must include role and content" % (index, message_index)
+                )
 
 
 def run_live(
@@ -485,6 +586,8 @@ def run_live(
     pod_id: Optional[str] = None,
     gpu_type: Optional[str] = None,
     model_revision: Optional[str] = None,
+    small_model_revision: Optional[str] = None,
+    large_model_revision: Optional[str] = None,
     quantization: Optional[str] = None,
     server_version: Optional[str] = None,
     snapshot_id: Optional[str] = None,
@@ -492,6 +595,9 @@ def run_live(
     post: PostFn = post_json,
     resume: bool = True,
 ) -> Dict[str, Any]:
+    validate_request_rows(requests)
+    if max_response_bytes < 1:
+        raise LiveRunnerError("max_response_bytes must be >= 1")
     matched = filter_requests(
         requests,
         conditions=conditions,
@@ -502,6 +608,10 @@ def run_live(
     output_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_path = output_dir / "responses.json"
     session_path = output_dir / "session.json"
+    if not resume and checkpoint_path.exists():
+        raise LiveRunnerError(
+            "refusing to overwrite existing checkpoint without resume: %s" % checkpoint_path
+        )
     checkpoint = load_checkpoint(checkpoint_path) if resume and checkpoint_path.exists() else {
         "session": {},
         "responses": [],
@@ -547,6 +657,8 @@ def run_live(
     single_model_id = None
     if transport == "direct" and small_model_id and large_model_id and len(aliases) == 1:
         single_model_id = large_model_id if next(iter(aliases)) == "large" else small_model_id
+    resolved_small_revision = small_model_revision or model_revision
+    resolved_large_revision = large_model_revision or model_revision
     session = build_session_metadata(
         transport=transport,
         model_id=single_model_id,
@@ -559,18 +671,15 @@ def run_live(
         pod_id=pod_id,
         small_model_id=small_model_id,
         large_model_id=large_model_id,
+        small_model_revision=resolved_small_revision,
+        large_model_revision=resolved_large_revision,
     )
-    # Preserve operator-recorded actuals from checkpoint or session.json.
-    prior_actuals = checkpoint.get("session", {}).get("session_actuals")
-    if not isinstance(prior_actuals, dict) and resume and session_path.exists():
-        try:
-            prior_session = json.loads(session_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            prior_session = {}
-        if isinstance(prior_session, dict) and isinstance(prior_session.get("session_actuals"), dict):
-            prior_actuals = prior_session["session_actuals"]
-    if isinstance(prior_actuals, dict):
-        session["session_actuals"] = prior_actuals
+    session["session_actuals"] = _merge_session_actuals(
+        session["session_actuals"],
+        checkpoint.get("session", {}).get("session_actuals"),
+        session_path,
+        resume=resume,
+    )
 
     for request in pending:
         digest = request["request_sha256"]
@@ -594,7 +703,7 @@ def run_live(
             if request["condition"] in MEMORY_CONDITIONS:
                 embedding = embeddings.get(request["question_id"])
                 if embedding is None:
-                    row = failed_response(request, failure_code="missing_embedding")
+                    row = failed_response(request, failure_code="missing_embedding", evidence_source="edge")
                     responses.append(row)
                     done.add(digest)
                     write_checkpoint(checkpoint_path, session, responses)

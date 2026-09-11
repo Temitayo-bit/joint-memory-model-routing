@@ -64,6 +64,10 @@ def post_json(
 
     Does not follow redirects, does not retry, and caps response size.
     """
+    if timeout_s <= 0:
+        raise HttpTransportError("invalid_timeout", "timeout_s must be > 0")
+    if max_response_bytes < 1:
+        raise HttpTransportError("invalid_max_response_bytes", "max_response_bytes must be >= 1")
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise HttpTransportError("invalid_url", "model URL must be http(s)")
@@ -78,12 +82,13 @@ def post_json(
         method="POST",
     )
     started = time.perf_counter()
+    deadline = started + timeout_s
     try:
         with _opener().open(request, timeout=timeout_s) as response:
             status = int(getattr(response, "status", response.getcode()))
             if 300 <= status < 400:
                 raise HttpTransportError("redirect_rejected", "HTTP redirect rejected")
-            raw = _read_bounded(response, max_response_bytes)
+            raw = _read_bounded(response, max_response_bytes, deadline=deadline)
     except HttpTransportError:
         raise
     except urllib.error.HTTPError as exc:
@@ -91,7 +96,7 @@ def post_json(
         if 300 <= int(exc.code) < 400:
             raise HttpTransportError("redirect_rejected", "HTTP redirect rejected") from exc
         try:
-            raw = _read_bounded(exc, max_response_bytes)
+            raw = _read_bounded(exc, max_response_bytes, deadline=deadline)
         except HttpTransportError as size_error:
             raise size_error from exc
         except Exception:
@@ -127,7 +132,9 @@ def post_json(
     return status, parsed_json, elapsed_ms, raw
 
 
-def _read_bounded(response: Any, max_bytes: int) -> bytes:
+def _read_bounded(response: Any, max_bytes: int, *, deadline: Optional[float] = None) -> bytes:
+    if max_bytes < 1:
+        raise HttpTransportError("invalid_max_response_bytes", "max_response_bytes must be >= 1")
     length_header = None
     headers = getattr(response, "headers", None)
     if headers is not None:
@@ -141,7 +148,12 @@ def _read_bounded(response: Any, max_bytes: int) -> bytes:
     chunks = []
     received = 0
     while True:
-        chunk = response.read(min(65536, max_bytes - received + 1))
+        if deadline is not None and time.perf_counter() > deadline:
+            raise HttpTransportError("timeout", "request timed out")
+        remaining = max_bytes - received
+        if remaining <= 0:
+            raise HttpTransportError("response_too_large", "response exceeds size limit")
+        chunk = response.read(min(65536, remaining))
         if not chunk:
             break
         received += len(chunk)
@@ -149,4 +161,3 @@ def _read_bounded(response: Any, max_bytes: int) -> bytes:
             raise HttpTransportError("response_too_large", "response exceeds size limit")
         chunks.append(chunk)
     return b"".join(chunks)
-

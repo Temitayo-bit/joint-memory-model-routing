@@ -67,6 +67,7 @@ Local launch-command generation pins, without executing RunPod:
 
 - Small: `Qwen/Qwen3-4B-AWQ` revision `74d4bd2bd4bff9cafc9345221320bffb08b406a3`
 - Large: `Qwen/Qwen3-14B-AWQ` revision `31c69efc29464b6bb0aee1398b5a7b50a99340c3`
-- Image: `vllm/vllm-openai:v0.29.0` with `--generation-config vllm`
+- Image: `vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1` (tag alias `v0.29.0`) with `--generation-config vllm`
+- Embeddings: `sentence-transformers/all-MiniLM-L6-v2` revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`
 
 These pins support reproducible operator commands. They are not research results.

@@ -7,8 +7,12 @@ from typing import Any, Dict, List, Mapping
 
 from experiments.text_baseline.constants import FIXED_GENERATION
 
-VLLM_IMAGE = "vllm/vllm-openai:v0.29.0"
+VLLM_IMAGE_NAME = "vllm/vllm-openai"
 VLLM_VERSION = "v0.29.0"
+# Digested from the 2026-09-11 smoke session; prefer digest over a mutable tag.
+VLLM_IMAGE_DIGEST = "sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1"
+VLLM_IMAGE = "%s@%s" % (VLLM_IMAGE_NAME, VLLM_IMAGE_DIGEST)
+VLLM_IMAGE_TAG = "%s:%s" % (VLLM_IMAGE_NAME, VLLM_VERSION)
 
 PINNED_MODELS: Dict[str, Dict[str, str]] = {
     "small": {
@@ -58,19 +62,18 @@ def build_vllm_args(model_key: str, *, host: str = "0.0.0.0", port: int = 8000) 
 
 def render_docker_command(model_key: str, *, host: str = "0.0.0.0", port: int = 8000) -> str:
     args = build_vllm_args(model_key, host=host, port=port)
-    return " ".join(
-        [
-            "docker",
-            "run",
-            "--rm",
-            "--gpus",
-            "all",
-            "-p",
-            "%s:%s" % (port, port),
-            VLLM_IMAGE,
-            *args,
-        ]
-    )
+    tokens = [
+        "docker",
+        "run",
+        "--rm",
+        "--gpus",
+        "all",
+        "-p",
+        "%s:%s" % (port, port),
+        VLLM_IMAGE,
+        *args,
+    ]
+    return " ".join(shlex.quote(part) for part in tokens)
 
 
 def render_runpod_start_command(model_key: str, *, host: str = "0.0.0.0", port: int = 8000) -> str:
@@ -87,6 +90,8 @@ def launch_bundle(model_key: str, *, host: str = "0.0.0.0", port: int = 8000) ->
             "record costs, and terminate it. This tool never launches remote compute."
         ),
         "image": VLLM_IMAGE,
+        "image_tag": VLLM_IMAGE_TAG,
+        "image_digest": VLLM_IMAGE_DIGEST,
         "vllm_version": VLLM_VERSION,
         "model": pinned,
         "fixed_generation": dict(FIXED_GENERATION),
@@ -106,6 +111,7 @@ def launch_bundle_both(*, host: str = "0.0.0.0", port: int = 8000) -> Mapping[st
         "not_executed": True,
         "vllm_version": VLLM_VERSION,
         "image": VLLM_IMAGE,
+        "image_digest": VLLM_IMAGE_DIGEST,
         "fixed_generation": dict(FIXED_GENERATION),
         "small": launch_bundle("small", host=host, port=port),
         "large": launch_bundle("large", host=host, port=port),
