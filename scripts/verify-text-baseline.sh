@@ -56,7 +56,16 @@ required = (
 missing = [item for item in required if item not in text]
 if missing:
     raise SystemExit("SQL contract missing: %s" % missing)
-print("Local SQL contract checks passed.")
+# Static presence checks only: CI has no live Postgres. Runtime RLS/grant
+# execution remains a local supabase db lint / apply responsibility.
+forbidden = (
+    "grant select, insert, update on table public.pilot_request_results",
+    "grant insert on table public.pilot_call_log",
+)
+leaked = [item for item in forbidden if item in text]
+if leaked:
+    raise SystemExit("SQL contract forbids: %s" % leaked)
+print("Static SQL migration contract presence checks passed (not live RLS execution).")
 PY
 
 if command -v supabase >/dev/null 2>&1; then

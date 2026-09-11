@@ -29,12 +29,8 @@ export function decodeJwtPayload(token: string): JwtClaims {
   }
 }
 
-export function assertPilotAccess(
-  claims: JwtClaims,
-  nowEpochSeconds: number,
-  allowlisted: boolean,
-  sessionPresent: boolean,
-): string {
+/** Validate application-user JWT claims locally before any database call. */
+export function assertApplicationUserJwt(claims: JwtClaims, nowEpochSeconds: number): string {
   if (!claims.sub) {
     throw new PilotValidationError("JWT missing subject", 401);
   }
@@ -44,13 +40,23 @@ export function assertPilotAccess(
   if (claims.role !== "authenticated") {
     throw new PilotValidationError("JWT is not an application-user token", 401);
   }
+  return claims.sub;
+}
+
+export function assertPilotAccess(
+  claims: JwtClaims,
+  nowEpochSeconds: number,
+  allowlisted: boolean,
+  sessionPresent: boolean,
+): string {
+  const userId = assertApplicationUserJwt(claims, nowEpochSeconds);
   if (!sessionPresent) {
     throw new PilotValidationError("pilot session configuration missing or expired", 403);
   }
   if (!allowlisted) {
     throw new PilotValidationError("caller is not on the supervised-pilot allowlist", 403);
   }
-  return claims.sub;
+  return userId;
 }
 
 export function readServerConfig(env: Record<string, string | undefined>): ServerConfig {
@@ -80,4 +86,29 @@ export function readServerConfig(env: Record<string, string | undefined>): Serve
     }
   }
   return mapped as ServerConfig;
+}
+
+/** Browser CORS allowlist from PILOT_CORS_ORIGINS (comma-separated exact origins). */
+export function allowedCorsOrigin(
+  req: Request,
+  env: Record<string, string | undefined>,
+): string | null {
+  const origin = req.headers.get("Origin");
+  if (!origin) return null;
+  const configured = (env.PILOT_CORS_ORIGINS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return configured.includes(origin) ? origin : null;
+}
+
+export function corsHeaders(origin: string | null): Record<string, string> {
+  if (!origin) return {};
+  return {
+    "access-control-allow-origin": origin,
+    "access-control-allow-headers": "authorization, content-type, apikey, x-client-info",
+    "access-control-allow-methods": "POST, OPTIONS",
+    "access-control-max-age": "86400",
+    vary: "Origin",
+  };
 }

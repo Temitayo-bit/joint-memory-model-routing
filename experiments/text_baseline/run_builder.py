@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from experiments.text_baseline.constants import MEMORY_CONDITIONS
+from experiments.text_baseline.constants import MEMORY_CONDITIONS, NO_MEMORY_CONDITIONS
 from experiments.text_baseline.costs import empty_cost_fields, session_actuals_template
 from experiments.text_baseline.fixtures import fixture_hashes, load_memory, load_questions
 from experiments.text_baseline.hashing import sha256_json
@@ -64,8 +64,11 @@ def build_requests(
                     memory,
                 )
             evidence = evidence_by_question[question_id]
+        elif condition in NO_MEMORY_CONDITIONS:
+            # S0/L0 never invoke retrieval plumbing.
+            evidence = []
         else:
-            evidence = retrieve_for_condition(condition, cell["question_text"], memory)
+            raise ValueError("unknown condition %s" % condition)
         messages = build_messages(
             {"id": question_id, "text": cell["question_text"], "category": cell["question_category"]},
             evidence,

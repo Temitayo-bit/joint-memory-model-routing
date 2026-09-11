@@ -36,7 +36,12 @@ async function rest<T>(
     if (response.status === 204) {
       return undefined as T;
     }
-    return await response.json() as T;
+    // Prefer: return=minimal and void RPCs may yield an empty 200/201 body.
+    const text = await response.text();
+    if (!text) {
+      return undefined as T;
+    }
+    return JSON.parse(text) as T;
   } finally {
     clearTimeout(timer);
   }

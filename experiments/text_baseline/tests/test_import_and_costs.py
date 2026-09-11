@@ -175,6 +175,30 @@ class MeasurementImportTests(unittest.TestCase):
         }
         with self.assertRaises(ImportError_):
             import_responses(tampered, {"responses": []})
+        schedule_tampered = {
+            "manifest": {**self.bundle["manifest"], "schedule_sha256": "0" * 64},
+            "requests": self.bundle["requests"],
+        }
+        with self.assertRaises(ImportError_):
+            import_responses(schedule_tampered, {"responses": []})
+        reordered = {
+            "manifest": self.bundle["manifest"],
+            "requests": list(reversed(self.bundle["requests"])),
+        }
+        with self.assertRaises(ImportError_):
+            import_responses(reordered, {"responses": []})
+
+    def test_answer_text_and_failure_code_must_be_strings(self) -> None:
+        bad_answer = _success(self.sample)
+        bad_answer["answer_text"] = 123
+        with self.assertRaises(ImportError_):
+            import_responses(self.bundle, {"responses": [bad_answer]})
+        failed = _success(self.sample)
+        failed["status"] = "failed"
+        failed["answer_text"] = None
+        failed["failure_code"] = 404
+        with self.assertRaises(ImportError_):
+            import_responses(self.bundle, {"responses": [failed]})
 
     def test_invented_market_estimate_without_rates_is_rejected(self) -> None:
         row = _success(self.sample)

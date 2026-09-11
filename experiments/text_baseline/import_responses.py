@@ -12,6 +12,7 @@ from typing import Any, Dict, Mapping, Optional, Sequence
 from experiments.text_baseline.costs import allocated_processing_cost, market_generation_estimate
 from experiments.text_baseline.hashing import sha256_json
 from experiments.text_baseline.run_builder import empty_measurements, request_digest
+from experiments.text_baseline.schedule import schedule_hash
 
 
 class ImportError_(ValueError):
@@ -146,6 +147,7 @@ def import_responses(
     if not isinstance(expected_requests_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_requests_hash):
         raise ImportError_("manifest.requests_sha256 is required")
     recomputed_digests = []
+    schedule_cells = []
     for row in requests:
         if not isinstance(row, Mapping):
             raise ImportError_("each request must be an object")
@@ -153,6 +155,15 @@ def import_responses(
         if row.get("request_sha256") != digest:
             raise ImportError_("request digest does not match canonical request fields")
         recomputed_digests.append(digest)
+        schedule_cells.append(
+            {
+                "repeat_index": row["repeat_index"],
+                "question_id": row["question_id"],
+                "condition": row["condition"],
+            }
+        )
+    if schedule != schedule_hash(schedule_cells):
+        raise ImportError_("tampered schedule order or identity")
     if expected_requests_hash != sha256_json(recomputed_digests):
         raise ImportError_("tampered requests list")
     if market_rates is not None:
@@ -214,20 +225,24 @@ def import_responses(
             measurements = validate_measurement_block(raw) if raw.get("latency_ms") else empty_measurements()
             if raw.get("answer_text"):
                 raise ImportError_("failed responses must not include answer_text")
+        answer_text = raw.get("answer_text") if status == "success" else None
+        failure_code = raw.get("failure_code") if status != "success" else None
+        if status == "success":
+            if not isinstance(answer_text, str) or not answer_text:
+                raise ImportError_("successful responses need non-empty string answer_text")
+        if status == "failed":
+            if not isinstance(failure_code, str) or not failure_code:
+                raise ImportError_("failed responses need non-empty string failure_code")
         record = {
             "request_sha256": digest,
             "question_id": request["question_id"],
             "condition": request["condition"],
             "repeat_index": request["repeat_index"],
             "status": status,
-            "answer_text": raw.get("answer_text") if status == "success" else None,
-            "failure_code": raw.get("failure_code") if status != "success" else None,
+            "answer_text": answer_text,
+            "failure_code": failure_code,
             "evidence_sha256": request["evidence_sha256"],
         }
-        if status == "success" and not record["answer_text"]:
-            raise ImportError_("successful responses need answer_text")
-        if status == "failed" and not record["failure_code"]:
-            raise ImportError_("failed responses need failure_code")
         record.update(measurements)
         records.append(record)
     if session_processing_total is not None:

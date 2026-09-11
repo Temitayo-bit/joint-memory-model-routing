@@ -1,6 +1,14 @@
 import { evidenceCanonical } from "./evidence.ts";
 import { MAX_REQUEST_BYTES, type Condition } from "./constants.ts";
-import { assertPilotAccess, bearerToken, decodeJwtPayload, readServerConfig } from "./access.ts";
+import {
+  assertApplicationUserJwt,
+  assertPilotAccess,
+  allowedCorsOrigin,
+  bearerToken,
+  corsHeaders,
+  decodeJwtPayload,
+  readServerConfig,
+} from "./access.ts";
 import { buildModelPayload, callModelOnce } from "./model_client.ts";
 import { buildMessages, sanitizeFailure, shouldRetrieve, type EvidenceItem } from "./prompt.ts";
 import { parsePilotBody, PilotValidationError, rejectOversized } from "./validate.ts";
@@ -60,20 +68,43 @@ async function sha256Hex(value: string, digest: PilotDeps["digest"]): Promise<st
   return digest(value);
 }
 
-function jsonError(error: PilotValidationError): Response {
-  return new Response(JSON.stringify({ error: error.message }), {
-    status: error.status,
-    headers: { "content-type": "application/json" },
+function withCors(response: Response, origin: string | null): Response {
+  if (!origin) return response;
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(corsHeaders(origin))) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
   });
+}
+
+function jsonError(error: PilotValidationError, origin: string | null = null): Response {
+  return withCors(
+    new Response(JSON.stringify({ error: error.message }), {
+      status: error.status,
+      headers: { "content-type": "application/json" },
+    }),
+    origin,
+  );
 }
 
 export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise<Response> {
   const gatewayStarted = deps.now();
+  const corsOrigin = allowedCorsOrigin(req, deps.env);
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204 });
+    if (!corsOrigin) {
+      return new Response(null, { status: 403 });
+    }
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders(corsOrigin),
+    });
   }
   if (req.method !== "POST") {
-    return jsonError(new PilotValidationError("POST required", 405));
+    return jsonError(new PilotValidationError("POST required", 405), corsOrigin);
   }
   try {
     const token = bearerToken(req);
@@ -81,6 +112,8 @@ export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise
       throw new PilotValidationError("missing bearer token", 401);
     }
     const claims = decodeJwtPayload(token);
+    // Reject anon/expired/malformed claims before any database RPC.
+    assertApplicationUserJwt(claims, Math.floor(deps.now() / 1000));
     const contentLength = Number(req.headers.get("content-length") ?? "0");
     if (contentLength) {
       rejectOversized(contentLength, MAX_REQUEST_BYTES, "request");
@@ -147,19 +180,22 @@ export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise
         input_tokens: model.inputTokens,
         output_tokens: model.outputTokens,
       });
-      return Response.json({
-        request_id: body.request_id,
-        status: "success",
-        condition: body.condition,
-        answer_text: model.text,
-        retrieval_ms: retrievalMs,
-        model_http_ms: model.httpMs,
-        gateway_ms: deps.now() - gatewayStarted,
-        first_token_ms: null,
-        input_tokens: model.inputTokens,
-        output_tokens: model.outputTokens,
-        evidence_sha256: evidenceSha,
-      });
+      return withCors(
+        Response.json({
+          request_id: body.request_id,
+          status: "success",
+          condition: body.condition,
+          answer_text: model.text,
+          retrieval_ms: retrievalMs,
+          model_http_ms: model.httpMs,
+          gateway_ms: deps.now() - gatewayStarted,
+          first_token_ms: null,
+          input_tokens: model.inputTokens,
+          output_tokens: model.outputTokens,
+          evidence_sha256: evidenceSha,
+        }),
+        corsOrigin,
+      );
     } catch (error) {
       const failure = sanitizeFailure(
         error instanceof PilotValidationError ? error.message : "model_request_failed",
@@ -176,12 +212,12 @@ export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise
         input_tokens: null,
         output_tokens: null,
       });
-      return jsonError(new PilotValidationError(failure.failure_code, 502));
+      return jsonError(new PilotValidationError(failure.failure_code, 502), corsOrigin);
     }
   } catch (error) {
     if (error instanceof PilotValidationError) {
-      return jsonError(error);
+      return jsonError(error, corsOrigin);
     }
-    return jsonError(new PilotValidationError("request failed", 400));
+    return jsonError(new PilotValidationError("request failed", 400), corsOrigin);
   }
 }

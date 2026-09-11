@@ -183,50 +183,14 @@ create policy pilot_results_select_own
     and (select public.pilot_supervised())
   );
 
-create policy pilot_results_insert_pending
-  on public.pilot_request_results
-  for insert
-  to authenticated
-  with check (
-    owner_id = (select auth.uid())
-    and status = 'pending'
-    and (select public.pilot_supervised())
-    and exists (
-      select 1
-      from public.pilot_memory_snapshots s
-      where s.id = snapshot_id
-        and s.owner_id = (select auth.uid())
-    )
-  );
-
-create policy pilot_results_update_pending
-  on public.pilot_request_results
-  for update
-  to authenticated
-  using (
-    owner_id = (select auth.uid())
-    and status = 'pending'
-    and (select public.pilot_supervised())
-  )
-  with check (
-    owner_id = (select auth.uid())
-    and status in ('success', 'failed')
-  );
+-- Result and call-log writes are not granted to authenticated clients.
+-- Narrow SECURITY DEFINER RPCs below perform those mutations after auth.uid() checks.
 
 create policy pilot_call_log_select_own
   on public.pilot_call_log
   for select
   to authenticated
   using (
-    user_id = (select auth.uid())
-    and (select public.pilot_supervised())
-  );
-
-create policy pilot_call_log_insert_own
-  on public.pilot_call_log
-  for insert
-  to authenticated
-  with check (
     user_id = (select auth.uid())
     and (select public.pilot_supervised())
   );

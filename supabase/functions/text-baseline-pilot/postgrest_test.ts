@@ -33,3 +33,21 @@ Deno.test("PostgREST adapter uses the user JWT and publishable key, not the mode
   assertEquals(await db.findResult("33333333-3333-4333-8333-333333333333"), null);
   assert(seen.every((row) => !row.includes("model.example")));
 });
+
+Deno.test("PostgREST adapter accepts empty successful write bodies", async () => {
+  const fetchImpl = (() =>
+    Promise.resolve(new Response("", { status: 201 }))) as typeof fetch;
+  const db = createPostgrestDb({
+    url: "https://example.supabase.co",
+    anonKey: "publishable-key",
+    jwt: "user-jwt",
+    fetchImpl,
+  });
+  await db.insertPending({
+    request_id: "33333333-3333-4333-8333-333333333333",
+    owner_id: "11111111-1111-4111-8111-111111111111",
+    snapshot_id: "22222222-2222-4222-8222-222222222222",
+    condition: "S0",
+    question: "q",
+  });
+});

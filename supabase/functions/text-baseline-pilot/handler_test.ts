@@ -17,7 +17,7 @@ async function assertRejects(fn: () => Promise<unknown>): Promise<void> {
 function assert(condition: unknown): asserts condition {
   if (!condition) throw new Error("assertion failed");
 }
-import { assertPilotAccess, decodeJwtPayload, readServerConfig } from "./access.ts";
+import { assertApplicationUserJwt, assertPilotAccess, decodeJwtPayload, readServerConfig } from "./access.ts";
 import { FIXED_GENERATION } from "./constants.ts";
 import { evidenceCanonical } from "./evidence.ts";
 import { handlePilotRequest, type PilotDb, type PilotDeps, type SessionSettings } from "./handler.ts";
@@ -54,6 +54,7 @@ const TEST_ENV = {
   PILOT_LARGE_MODEL_REVISION: "unverified-revision",
   PILOT_SMALL_QUANTIZATION: "unverified-quant",
   PILOT_LARGE_QUANTIZATION: "unverified-quant",
+  PILOT_CORS_ORIGINS: "https://app.example",
 };
 
 class MemoryDb implements PilotDb {
@@ -66,11 +67,17 @@ class MemoryDb implements PilotDb {
   events: string[] = [];
   pendingCount = 0;
   claimAlways = true;
+  sessionLookups = 0;
+  allowlistLookups = 0;
 
   accessIsActive(userId: string) {
+    this.allowlistLookups += 1;
+    this.events.push("allowlist");
     return Promise.resolve(this.allow.has(userId));
   }
   sessionSettings() {
+    this.sessionLookups += 1;
+    this.events.push("session");
     return Promise.resolve(this.session);
   }
   verifySnapshotOwnership(userId: string, snapshotId: string) {
@@ -208,7 +215,7 @@ Deno.test("allowlist rejection", async () => {
   assertEquals(res.status, 403);
 });
 
-Deno.test("application-user role is required", async () => {
+Deno.test("application-user role is required before database calls", async () => {
   const db = new MemoryDb();
   const req = new Request("http://localhost/text-baseline-pilot", {
     method: "POST",
@@ -222,6 +229,36 @@ Deno.test("application-user role is required", async () => {
   });
   const res = await handlePilotRequest(req, deps(db, okFetch()));
   assertEquals(res.status, 401);
+  assertEquals(db.sessionLookups, 0);
+  assertEquals(db.allowlistLookups, 0);
+});
+
+Deno.test("CORS preflight and responses include configured origin", async () => {
+  const db = new MemoryDb();
+  const preflight = new Request("http://localhost/text-baseline-pilot", {
+    method: "OPTIONS",
+    headers: { origin: "https://app.example" },
+  });
+  const optionsRes = await handlePilotRequest(preflight, deps(db, okFetch()));
+  assertEquals(optionsRes.status, 204);
+  assertEquals(optionsRes.headers.get("access-control-allow-origin"), "https://app.example");
+  assertEquals(optionsRes.headers.get("access-control-allow-headers")?.includes("authorization"), true);
+
+  const denied = await handlePilotRequest(
+    new Request("http://localhost/text-baseline-pilot", {
+      method: "OPTIONS",
+      headers: { origin: "https://evil.example" },
+    }),
+    deps(db, okFetch()),
+  );
+  assertEquals(denied.status, 403);
+
+  const res = await handlePilotRequest(
+    requestFor("S0", {}, { origin: "https://app.example" }),
+    deps(db, okFetch()),
+  );
+  assertEquals(res.status, 200);
+  assertEquals(res.headers.get("access-control-allow-origin"), "https://app.example");
 });
 
 Deno.test("expired JWT rejected", async () => {
@@ -293,9 +330,11 @@ Deno.test("memory conditions retrieve once before the model call", async () => {
   const res = await handlePilotRequest(requestFor("S1"), deps(db, okFetch()));
   assertEquals(res.status, 200);
   assertEquals(db.retrieveCount, 1);
-  assertEquals(db.events[0], "retrieve");
-  assertEquals(db.events[1], "claim");
-  assertEquals(db.events[2], "pending");
+  assertEquals(db.events[0], "session");
+  assertEquals(db.events[1], "allowlist");
+  assertEquals(db.events[2], "retrieve");
+  assertEquals(db.events[3], "claim");
+  assertEquals(db.events[4], "pending");
 });
 
 Deno.test("duplicate request_id rejected", async () => {
@@ -377,9 +416,16 @@ Deno.test("decodeJwtPayload rejects malformed tokens", () => {
 Deno.test("assertPilotAccess requires session and allowlist", () => {
   let threw = false;
   try {
-    assertPilotAccess({ sub: USER, exp: 4_000_000_000 }, 10, true, false);
+    assertPilotAccess({ sub: USER, exp: 4_000_000_000, role: "authenticated" }, 10, true, false);
   } catch (error) {
     threw = error instanceof PilotValidationError;
+  }
+  assert(threw);
+  threw = false;
+  try {
+    assertApplicationUserJwt({ sub: USER, exp: 4_000_000_000, role: "anon" }, 10);
+  } catch (error) {
+    threw = error instanceof PilotValidationError && error.status === 401;
   }
   assert(threw);
 });

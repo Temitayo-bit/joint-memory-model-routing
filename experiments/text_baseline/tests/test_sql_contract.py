@@ -40,10 +40,11 @@ class SqlContractTests(unittest.TestCase):
         self.assertIn("revoke all on table public.pilot_request_results", self.sql)
         self.assertIn("revoke all on table public.pilot_call_log", self.sql)
         self.assertNotIn("grant select, insert, update on table public.pilot_request_results", self.sql)
-        self.assertIn(
-            "from public.pilot_memory_snapshots s\n      where s.id = snapshot_id\n        and s.owner_id = (select auth.uid())",
-            self.sql,
-        )
+        self.assertNotIn("create policy pilot_results_insert_pending", self.sql)
+        self.assertNotIn("create policy pilot_results_update_pending", self.sql)
+        self.assertNotIn("create policy pilot_call_log_insert_own", self.sql)
+        self.assertIn("snapshot not owned by caller", self.sql)
+        self.assertIn("insert into public.pilot_call_log(user_id, request_id)", self.sql)
 
     def test_jwt_remains_required(self) -> None:
         self.assertIn("verify_jwt = true", self.config)
