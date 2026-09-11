@@ -33,6 +33,10 @@ audio/
 # Locally downloaded RunPod CLI binary
 tools/runpodctl
 
+# Local agent scratch trees (not part of the research artifact)
+_local-wip-backup/
+pr2-checkout/
+
 # Vendor-maintained skills are installed locally; source and exact hashes are
 # recorded in skills-lock.json. Keep only this project's custom workflows in Git.
 .agents/skills/autofix/

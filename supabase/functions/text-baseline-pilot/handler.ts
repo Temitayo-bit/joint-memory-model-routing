@@ -22,8 +22,7 @@ export type PilotDb = {
     embedding: number[],
   ): Promise<EvidenceItem[]>;
   findResult(requestId: string): Promise<{ status: string } | null>;
-  countRecentCalls(userId: string, windowSeconds: number, nowMs: number): Promise<number>;
-  recordCall(userId: string, requestId: string, nowMs: number): Promise<void>;
+  claimCall(requestId: string): Promise<boolean>;
   insertPending(row: PendingRow): Promise<void>;
   finalize(requestId: string, ownerId: string, patch: FinalPatch): Promise<void>;
 };
@@ -102,15 +101,12 @@ export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise
     if (existing) {
       throw new PilotValidationError("duplicate request_id", 409);
     }
-    const recent = await deps.db.countRecentCalls(userId, session!.window_seconds, deps.now());
-    if (recent >= session!.max_calls) {
-      throw new PilotValidationError("call rate exceeded", 429);
-    }
     const owned = await deps.db.verifySnapshotOwnership(userId, body.snapshot_id);
     if (!owned) {
       throw new PilotValidationError("snapshot not owned by caller", 403);
     }
-    await deps.db.recordCall(userId, body.request_id, deps.now());
+    // Prepare fixed server settings and messages before any durable pending row.
+    const config = readServerConfig(deps.env);
     let evidence: EvidenceItem[] = [];
     let retrievalMs: number | null = null;
     if (shouldRetrieve(body.condition)) {
@@ -124,6 +120,12 @@ export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise
       retrievalMs = deps.now() - retrievalStarted;
     }
     const evidenceSha = await sha256Hex(evidenceCanonical(evidence), deps.digest);
+    const messages = buildMessages(body.question, evidence);
+    const modelPayload = buildModelPayload(body.condition, messages, config);
+    const claimed = await deps.db.claimCall(body.request_id);
+    if (!claimed) {
+      throw new PilotValidationError("call rate exceeded", 429);
+    }
     await deps.db.insertPending({
       request_id: body.request_id,
       owner_id: userId,
@@ -131,15 +133,8 @@ export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise
       condition: body.condition,
       question: body.question,
     });
-    const config = readServerConfig(deps.env);
-    const messages = buildMessages(body.question, evidence);
     try {
-      const model = await callModelOnce(
-        config,
-        buildModelPayload(body.condition, messages, config),
-        deps.fetch,
-        deps.now,
-      );
+      const model = await callModelOnce(config, modelPayload, deps.fetch, deps.now);
       await deps.db.finalize(body.request_id, userId, {
         status: "success",
         answer_text: model.text,

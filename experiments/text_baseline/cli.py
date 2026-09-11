@@ -20,9 +20,9 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def cmd_mock(args: argparse.Namespace) -> int:
-    output = prepare_output_dir(Path(args.output))
     bundle = build_requests(Path(args.data_dir), repeats=args.repeats, seed=args.seed)
     records = [mock_record(request) for request in bundle["requests"]]
+    output = prepare_output_dir(Path(args.output))
     _write_json(output / "manifest.json", bundle["manifest"])
     _write_json(output / "requests.json", {"requests": bundle["requests"]})
     _write_json(
@@ -36,15 +36,14 @@ def cmd_mock(args: argparse.Namespace) -> int:
 
 
 def cmd_export(args: argparse.Namespace) -> int:
-    output = prepare_output_dir(Path(args.output))
     bundle = build_requests(Path(args.data_dir), repeats=args.repeats, seed=args.seed)
+    output = prepare_output_dir(Path(args.output))
     _write_json(output / "manifest.json", bundle["manifest"])
     _write_json(output / "requests.json", {"requests": bundle["requests"]})
     return 0
 
 
 def cmd_import(args: argparse.Namespace) -> int:
-    output = prepare_output_dir(Path(args.output))
     requests_payload = load_json(Path(args.requests))
     if "requests" not in requests_payload:
         raise ValueError("requests JSON must contain a requests array")
@@ -58,6 +57,7 @@ def cmd_import(args: argparse.Namespace) -> int:
         market_rates=rates,
         session_processing_total=args.session_processing_total,
     )
+    output = prepare_output_dir(Path(args.output))
     _write_json(output / "manifest.json", imported["manifest"])
     _write_json(output / "records.json", {"not_a_research_result": True, "records": imported["records"]})
     return 0

@@ -1,11 +1,13 @@
 import type { PilotDb, PendingRow, FinalPatch, SessionSettings } from "./handler.ts";
 import type { EvidenceItem } from "./prompt.ts";
+import { UPSTREAM_TIMEOUT_MS } from "./constants.ts";
 
 export type PostgrestConfig = {
   url: string;
   anonKey: string;
   jwt: string;
   fetchImpl: typeof fetch;
+  timeoutMs?: number;
 };
 
 async function rest<T>(
@@ -13,23 +15,31 @@ async function rest<T>(
   path: string,
   init: RequestInit,
 ): Promise<T> {
-  const response = await config.fetchImpl(`${config.url.replace(/\/$/, "")}${path}`, {
-    ...init,
-    headers: {
-      authorization: `Bearer ${config.jwt}`,
-      apikey: config.anonKey,
-      "content-type": "application/json",
-      ...(init.headers ?? {}),
-    },
-    redirect: "error",
-  });
-  if (!response.ok) {
-    throw new Error(`postgrest_${response.status}`);
+  const controller = new AbortController();
+  const timeoutMs = config.timeoutMs ?? UPSTREAM_TIMEOUT_MS;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await config.fetchImpl(`${config.url.replace(/\/$/, "")}${path}`, {
+      ...init,
+      headers: {
+        authorization: `Bearer ${config.jwt}`,
+        apikey: config.anonKey,
+        "content-type": "application/json",
+        ...(init.headers ?? {}),
+      },
+      redirect: "error",
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`postgrest_${response.status}`);
+    }
+    if (response.status === 204) {
+      return undefined as T;
+    }
+    return await response.json() as T;
+  } finally {
+    clearTimeout(timer);
   }
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return await response.json() as T;
 }
 
 export function createPostgrestDb(config: PostgrestConfig): PilotDb {
@@ -75,60 +85,40 @@ export function createPostgrestDb(config: PostgrestConfig): PilotDb {
       );
       return data[0] ?? null;
     },
-    async countRecentCalls(_userId, windowSeconds) {
-      const data = await rest<number>(config, "/rest/v1/rpc/pilot_recent_call_count", {
+    async claimCall(requestId) {
+      const data = await rest<boolean>(config, "/rest/v1/rpc/claim_pilot_call", {
         method: "POST",
-        body: JSON.stringify({ p_window_seconds: windowSeconds }),
+        body: JSON.stringify({ p_request_id: requestId }),
       });
-      return typeof data === "number" ? data : 0;
-    },
-    async recordCall(userId, requestId, nowMs) {
-      await rest(config, "/rest/v1/pilot_call_log", {
-        method: "POST",
-        headers: { Prefer: "return=minimal" },
-        body: JSON.stringify({
-          user_id: userId,
-          request_id: requestId,
-          called_at: new Date(nowMs).toISOString(),
-        }),
-      });
+      return data === true;
     },
     async insertPending(row: PendingRow) {
-      await rest(config, "/rest/v1/pilot_request_results", {
+      await rest(config, "/rest/v1/rpc/insert_pilot_pending", {
         method: "POST",
-        headers: { Prefer: "return=minimal" },
         body: JSON.stringify({
-          request_id: row.request_id,
-          owner_id: row.owner_id,
-          snapshot_id: row.snapshot_id,
-          condition: row.condition,
-          question: row.question,
-          status: "pending",
+          p_request_id: row.request_id,
+          p_snapshot_id: row.snapshot_id,
+          p_condition: row.condition,
+          p_question: row.question,
         }),
       });
     },
-    async finalize(requestId, ownerId, patch: FinalPatch) {
-      await rest(
-        config,
-        `/rest/v1/pilot_request_results?request_id=eq.${encodeURIComponent(requestId)}&owner_id=eq.${encodeURIComponent(ownerId)}&status=eq.pending`,
-        {
-          method: "PATCH",
-          headers: { Prefer: "return=minimal" },
-          body: JSON.stringify({
-            status: patch.status,
-            answer_text: patch.answer_text,
-            failure_code: patch.failure_code,
-            evidence_sha256: patch.evidence_sha256,
-            retrieval_ms: patch.retrieval_ms,
-            model_http_ms: patch.model_http_ms,
-            gateway_ms: patch.gateway_ms,
-            first_token_ms: patch.first_token_ms,
-            input_tokens: patch.input_tokens,
-            output_tokens: patch.output_tokens,
-            updated_at: new Date().toISOString(),
-          }),
-        },
-      );
+    async finalize(requestId, _ownerId, patch: FinalPatch) {
+      await rest(config, "/rest/v1/rpc/finalize_pilot_result", {
+        method: "POST",
+        body: JSON.stringify({
+          p_request_id: requestId,
+          p_status: patch.status,
+          p_answer_text: patch.answer_text,
+          p_failure_code: patch.failure_code,
+          p_evidence_sha256: patch.evidence_sha256,
+          p_retrieval_ms: patch.retrieval_ms,
+          p_model_http_ms: patch.model_http_ms,
+          p_gateway_ms: patch.gateway_ms,
+          p_input_tokens: patch.input_tokens,
+          p_output_tokens: patch.output_tokens,
+        }),
+      });
     },
   };
 }

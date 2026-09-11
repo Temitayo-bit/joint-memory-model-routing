@@ -1,4 +1,4 @@
-import { FIXED_GENERATION, MAX_MODEL_RESPONSE_BYTES, modelAlias, type Condition, type ServerConfig } from "./constants.ts";
+import { FIXED_GENERATION, MAX_MODEL_RESPONSE_BYTES, UPSTREAM_TIMEOUT_MS, modelAlias, type Condition, type ServerConfig } from "./constants.ts";
 import { PilotValidationError } from "./validate.ts";
 
 export type ModelSuccess = {
@@ -10,6 +10,10 @@ export type ModelSuccess = {
 
 function joinUrl(base: string, path: string): string {
   return `${base.replace(/\/$/, "")}${path}`;
+}
+
+function asNonNegativeInt(value: unknown): number | null {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
 export function buildModelPayload(
@@ -31,8 +35,11 @@ export async function callModelOnce(
   payload: Record<string, unknown>,
   fetchImpl: typeof fetch,
   now: () => number,
+  timeoutMs: number = UPSTREAM_TIMEOUT_MS,
 ): Promise<ModelSuccess> {
   const started = now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   let response: Response;
   try {
     response = await fetchImpl(joinUrl(config.modelBaseUrl, "/v1/chat/completions"), {
@@ -43,13 +50,19 @@ export async function callModelOnce(
       },
       body: JSON.stringify(payload),
       redirect: "error",
+      signal: controller.signal,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "model_http_error";
+    if (/abort/i.test(message) || (error instanceof DOMException && error.name === "AbortError")) {
+      throw new PilotValidationError("model request timeout", 502);
+    }
     if (/redirect/i.test(message)) {
       throw new PilotValidationError("model redirect rejected", 502);
     }
     throw new PilotValidationError("model request failed", 502);
+  } finally {
+    clearTimeout(timer);
   }
   if (response.status >= 300 && response.status < 400) {
     throw new PilotValidationError("model redirect rejected", 502);
@@ -71,9 +84,12 @@ export async function callModelOnce(
     throw new PilotValidationError("model response missing text", 502);
   }
   const usage = parsed.usage as { prompt_tokens?: unknown; completion_tokens?: unknown } | undefined;
-  const inputTokens = typeof usage?.prompt_tokens === "number" ? usage.prompt_tokens : null;
-  const outputTokens = typeof usage?.completion_tokens === "number" ? usage.completion_tokens : null;
-  return { text, inputTokens, outputTokens, httpMs };
+  return {
+    text,
+    inputTokens: asNonNegativeInt(usage?.prompt_tokens),
+    outputTokens: asNonNegativeInt(usage?.completion_tokens),
+    httpMs,
+  };
 }
 
 export async function readBounded(response: Response, maxBytes: number): Promise<ArrayBuffer> {

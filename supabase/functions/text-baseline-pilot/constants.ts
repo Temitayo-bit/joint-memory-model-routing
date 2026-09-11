@@ -40,9 +40,12 @@ export const FIXED_GENERATION = Object.freeze({
   temperature: 0.7,
   top_p: 0.8,
   top_k: 20,
+  min_p: 0,
   seed: 42,
   chat_template_kwargs: Object.freeze({ enable_thinking: false }),
 });
+
+export const UPSTREAM_TIMEOUT_MS = 70_000;
 
 export type ServerConfig = {
   modelBaseUrl: string;

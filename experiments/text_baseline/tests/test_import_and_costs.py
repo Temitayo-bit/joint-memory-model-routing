@@ -100,10 +100,57 @@ class MeasurementImportTests(unittest.TestCase):
 
     def test_market_estimate_uses_documented_rates_only(self) -> None:
         row = _success(self.sample)
-        rates = {self.sample["condition"]: {"input_per_million": 1000, "output_per_million": 2000}}
+        rates = {
+            "currency": "USD",
+            "source_url": "https://example.com/pricing",
+            "checked_on": "2026-09-11",
+            "priced_model_or_service": "synthetic-test-model",
+            "basis": "exact_model",
+            "S0": {"input_per_million": None, "output_per_million": None},
+            "S1": {"input_per_million": None, "output_per_million": None},
+            "L0": {"input_per_million": None, "output_per_million": None},
+            "L1": {"input_per_million": None, "output_per_million": None},
+            self.sample["condition"]: {"input_per_million": 1000, "output_per_million": 2000},
+        }
         imported = import_responses(self.bundle, {"responses": [row]}, market_rates=rates)
         self.assertEqual(imported["records"][0]["costs"]["market_generation_estimate"], 0.018)
         self.assertIsNone(imported["records"][0]["costs"]["actual_rental_and_service_spend"])
+        self.assertIsNotNone(imported["manifest"]["market_rates_sha256"])
+
+    def test_non_finite_measurements_and_rates_are_rejected(self) -> None:
+        bad = _success(self.sample)
+        bad["latency_ms"]["model_http"] = float("nan")
+        with self.assertRaises(ImportError_):
+            import_responses(self.bundle, {"responses": [bad]})
+        with self.assertRaises(CostError):
+            market_generation_estimate(10, 4, float("inf"), 2)
+
+    def test_responses_must_be_a_list_of_objects(self) -> None:
+        with self.assertRaises(ImportError_):
+            import_responses(self.bundle, {"responses": {"oops": True}})
+
+    def test_market_rates_require_provenance(self) -> None:
+        row = _success(self.sample)
+        with self.assertRaises(ImportError_):
+            import_responses(
+                self.bundle,
+                {"responses": [row]},
+                market_rates={self.sample["condition"]: {"input_per_million": 1, "output_per_million": 1}},
+            )
+
+    def test_canonical_request_digest_is_recomputed(self) -> None:
+        altered = {
+            "manifest": self.bundle["manifest"],
+            "requests": [
+                {
+                    **self.bundle["requests"][0],
+                    "messages": [{"role": "user", "content": "tampered"}],
+                },
+                *self.bundle["requests"][1:],
+            ],
+        }
+        with self.assertRaises(ImportError_):
+            import_responses(altered, {"responses": []})
 
     def test_processing_allocation_is_separate(self) -> None:
         row = _success(self.sample)

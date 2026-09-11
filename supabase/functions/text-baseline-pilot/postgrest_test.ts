@@ -1,4 +1,12 @@
-import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import nodeAssert from "node:assert/strict";
+
+function assertEquals(actual: unknown, expected: unknown): void {
+  nodeAssert.deepEqual(actual, expected);
+}
+
+function assert(condition: unknown): asserts condition {
+  if (!condition) throw new Error("assertion failed");
+}
 import { createPostgrestDb } from "./postgrest.ts";
 
 Deno.test("PostgREST adapter uses the user JWT and publishable key, not the model bearer", async () => {

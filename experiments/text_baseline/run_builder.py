@@ -29,6 +29,19 @@ def empty_measurements() -> Dict[str, Any]:
     }
 
 
+def request_digest(request: Mapping[str, Any]) -> str:
+    """Hash the canonical request fields. Stored digests are never trusted alone."""
+    return sha256_json(
+        {
+            "repeat_index": request["repeat_index"],
+            "question_id": request["question_id"],
+            "condition": request["condition"],
+            "messages": request["messages"],
+            "evidence_sha256": request["evidence_sha256"],
+        }
+    )
+
+
 def build_requests(
     data_dir,
     repeats: int = 1,
@@ -68,15 +81,7 @@ def build_requests(
             "evidence_sha256": evidence_hash(evidence),
             "retrieval_invoked": condition in MEMORY_CONDITIONS,
         }
-        request["request_sha256"] = sha256_json(
-            {
-                "repeat_index": request["repeat_index"],
-                "question_id": request["question_id"],
-                "condition": request["condition"],
-                "messages": request["messages"],
-                "evidence_sha256": request["evidence_sha256"],
-            }
-        )
+        request["request_sha256"] = request_digest(request)
         requests.append(request)
     manifest = {
         "experiment": "text_baseline_fixed_conditions",

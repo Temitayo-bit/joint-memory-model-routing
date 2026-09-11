@@ -1,4 +1,22 @@
-import { assertEquals, assertRejects, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import nodeAssert from "node:assert/strict";
+
+function assertEquals(actual: unknown, expected: unknown): void {
+  nodeAssert.deepEqual(actual, expected);
+}
+
+async function assertRejects(fn: () => Promise<unknown>): Promise<void> {
+  let failed = false;
+  try {
+    await fn();
+  } catch {
+    failed = true;
+  }
+  nodeAssert.equal(failed, true);
+}
+
+function assert(condition: unknown): asserts condition {
+  if (!condition) throw new Error("assertion failed");
+}
 import { assertPilotAccess, decodeJwtPayload, readServerConfig } from "./access.ts";
 import { FIXED_GENERATION } from "./constants.ts";
 import { evidenceCanonical } from "./evidence.ts";
@@ -43,10 +61,11 @@ class MemoryDb implements PilotDb {
   session: SessionSettings | null = { deadline: "2099-01-01T00:00:00Z", max_calls: 6, window_seconds: 60 };
   owners = new Map<string, string>([[SNAP, USER]]);
   results = new Map<string, { status: string }>();
-  calls: Array<{ userId: string; at: number }> = [];
+  calls: Array<{ userId: string; requestId: string; at: number }> = [];
   retrieveCount = 0;
   events: string[] = [];
   pendingCount = 0;
+  claimAlways = true;
 
   accessIsActive(userId: string) {
     return Promise.resolve(this.allow.has(userId));
@@ -67,13 +86,18 @@ class MemoryDb implements PilotDb {
   findResult(requestId: string) {
     return Promise.resolve(this.results.get(requestId) ?? null);
   }
-  countRecentCalls(userId: string, windowSeconds: number, nowMs: number) {
+  claimCall(requestId: string) {
+    const nowMs = 1_700_000_000_000;
+    const windowSeconds = this.session?.window_seconds ?? 60;
+    const maxCalls = this.session?.max_calls ?? 0;
     const cutoff = nowMs - windowSeconds * 1000;
-    return Promise.resolve(this.calls.filter((row) => row.userId === userId && row.at >= cutoff).length);
-  }
-  recordCall(userId: string, _requestId: string, nowMs: number) {
-    this.calls.push({ userId, at: nowMs });
-    return Promise.resolve();
+    const recent = this.calls.filter((row) => row.at >= cutoff).length;
+    if (!this.claimAlways || recent >= maxCalls || this.calls.some((row) => row.requestId === requestId)) {
+      return Promise.resolve(false);
+    }
+    this.calls.push({ userId: USER, requestId, at: nowMs });
+    this.events.push("claim");
+    return Promise.resolve(true);
   }
   insertPending(row: { request_id: string }) {
     this.pendingCount += 1;
@@ -139,6 +163,7 @@ function okFetch(): typeof fetch {
     assertEquals(payload.temperature, 0.7);
     assertEquals(payload.top_p, 0.8);
     assertEquals(payload.top_k, 20);
+    assertEquals(payload.min_p, 0);
     assertEquals(payload.seed, 42);
     assertEquals(payload.chat_template_kwargs, { enable_thinking: false });
     assertEquals((init as RequestInit).redirect, "error");
@@ -269,7 +294,8 @@ Deno.test("memory conditions retrieve once before the model call", async () => {
   assertEquals(res.status, 200);
   assertEquals(db.retrieveCount, 1);
   assertEquals(db.events[0], "retrieve");
-  assertEquals(db.events[1], "pending");
+  assertEquals(db.events[1], "claim");
+  assertEquals(db.events[2], "pending");
 });
 
 Deno.test("duplicate request_id rejected", async () => {
@@ -282,7 +308,7 @@ Deno.test("duplicate request_id rejected", async () => {
 Deno.test("throttled calls rejected", async () => {
   const db = new MemoryDb();
   db.session = { deadline: "2099-01-01T00:00:00Z", max_calls: 1, window_seconds: 60 };
-  db.calls.push({ userId: USER, at: 1_700_000_000_000 });
+  db.calls.push({ userId: USER, requestId: "prior", at: 1_700_000_000_000 });
   const res = await handlePilotRequest(requestFor("S0"), deps(db, okFetch()));
   assertEquals(res.status, 429);
 });
@@ -332,6 +358,7 @@ Deno.test("fixed non-thinking generation settings", () => {
   assertEquals(payload.temperature, FIXED_GENERATION.temperature);
   assertEquals(payload.top_p, FIXED_GENERATION.top_p);
   assertEquals(payload.top_k, FIXED_GENERATION.top_k);
+  assertEquals(payload.min_p, FIXED_GENERATION.min_p);
   assertEquals(payload.seed, FIXED_GENERATION.seed);
   assertEquals(payload.stream, false);
   assertEquals(payload.chat_template_kwargs, { enable_thinking: false });

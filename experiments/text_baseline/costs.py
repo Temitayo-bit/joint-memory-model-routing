@@ -13,10 +13,14 @@ class CostError(ValueError):
 def _as_non_negative_number(value: Any, label: str) -> Decimal:
     if isinstance(value, bool) or value is None:
         raise CostError("%s must be a number" % label)
+    if isinstance(value, float) and value != value:  # NaN
+        raise CostError("%s must be finite" % label)
     try:
         parsed = Decimal(str(value))
     except (InvalidOperation, ValueError) as exc:
         raise CostError("%s is not a number" % label) from exc
+    if not parsed.is_finite():
+        raise CostError("%s must be finite" % label)
     if parsed < 0:
         raise CostError("%s must be >= 0" % label)
     return parsed

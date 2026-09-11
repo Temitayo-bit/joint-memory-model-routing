@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import json
+import math
+import re
+from datetime import date
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Sequence
 
 from experiments.text_baseline.costs import allocated_processing_cost, market_generation_estimate
 from experiments.text_baseline.hashing import sha256_json
-from experiments.text_baseline.run_builder import empty_measurements
+from experiments.text_baseline.run_builder import empty_measurements, request_digest
 
 
 class ImportError_(ValueError):
@@ -17,6 +20,8 @@ class ImportError_(ValueError):
 
 _ALLOWED_STATUS = {"success", "failed", "missing"}
 _LATENCY_KEYS = ("retrieval", "model_http", "end_to_end", "first_token", "gateway", "client")
+_CONDITIONS = ("S0", "S1", "L0", "L1")
+_RATE_META_KEYS = ("currency", "source_url", "checked_on", "priced_model_or_service", "basis")
 
 
 def _require_mapping(value: Any, label: str) -> Mapping[str, Any]:
@@ -32,6 +37,8 @@ def _optional_non_negative(value: Any, label: str) -> Optional[float]:
         raise ImportError_("%s must be a number" % label)
     if not isinstance(value, (int, float)):
         raise ImportError_("%s must be a number" % label)
+    if not math.isfinite(value):
+        raise ImportError_("%s must be finite" % label)
     if value < 0:
         raise ImportError_("%s must be >= 0" % label)
     return float(value)
@@ -80,6 +87,8 @@ def validate_measurement_block(payload: Mapping[str, Any]) -> Dict[str, Any]:
 def _index_responses(responses: Sequence[Mapping[str, Any]]) -> Dict[str, Mapping[str, Any]]:
     indexed: Dict[str, Mapping[str, Any]] = {}
     for row in responses:
+        if not isinstance(row, Mapping):
+            raise ImportError_("each response must be an object")
         digest = row.get("request_sha256")
         if not digest or not isinstance(digest, str):
             raise ImportError_("each response needs request_sha256")
@@ -87,6 +96,32 @@ def _index_responses(responses: Sequence[Mapping[str, Any]]) -> Dict[str, Mappin
             raise ImportError_("duplicate response for %s" % digest)
         indexed[digest] = row
     return indexed
+
+
+def _validate_market_rates(market_rates: Mapping[str, Any]) -> None:
+    for key in _RATE_META_KEYS:
+        value = market_rates.get(key)
+        if not isinstance(value, str) or not value.strip():
+            raise ImportError_("market rates require %s" % key)
+    if not market_rates["source_url"].startswith("https://"):
+        raise ImportError_("market rate source_url must be https")
+    try:
+        date.fromisoformat(market_rates["checked_on"])
+    except ValueError as exc:
+        raise ImportError_("market rate checked_on must be YYYY-MM-DD") from exc
+    if market_rates["basis"] not in {"exact_model", "model_class_proxy"}:
+        raise ImportError_("market rate basis must be exact_model or model_class_proxy")
+    if market_rates.get("currency") != "USD":
+        raise ImportError_("market rate currency must be USD for this harness")
+    for condition in _CONDITIONS:
+        entry = market_rates.get(condition)
+        if not isinstance(entry, Mapping):
+            raise ImportError_("market rates require an entry for %s" % condition)
+        for field in ("input_per_million", "output_per_million"):
+            value = entry.get(field)
+            if value is None:
+                continue
+            _optional_non_negative(value, "%s.%s" % (condition, field))
 
 
 def import_responses(
@@ -98,16 +133,35 @@ def import_responses(
     requests = requests_bundle["requests"]
     if not isinstance(requests, list):
         raise ImportError_("requests bundle is missing the requests list")
-    manifest = requests_bundle.get("manifest") or {}
-    digest_list = [row["request_sha256"] for row in requests]
-    expected_requests_hash = manifest.get("requests_sha256")
-    if expected_requests_hash and expected_requests_hash != sha256_json(digest_list):
-        raise ImportError_("tampered requests list")
+    manifest = _require_mapping(requests_bundle.get("manifest"), "manifest")
     expected_count = manifest.get("expected_cell_count")
-    if expected_count is not None and len(requests) != expected_count:
+    if not isinstance(expected_count, int) or isinstance(expected_count, bool):
+        raise ImportError_("manifest.expected_cell_count is required")
+    if len(requests) != expected_count:
         raise ImportError_("incomplete or extra schedule cells")
-    indexed = _index_responses(list(responses_payload.get("responses") or []))
-    expected = {row["request_sha256"] for row in requests}
+    schedule = manifest.get("schedule_sha256")
+    if not isinstance(schedule, str) or not re.fullmatch(r"[0-9a-f]{64}", schedule):
+        raise ImportError_("manifest.schedule_sha256 is required")
+    expected_requests_hash = manifest.get("requests_sha256")
+    if not isinstance(expected_requests_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_requests_hash):
+        raise ImportError_("manifest.requests_sha256 is required")
+    recomputed_digests = []
+    for row in requests:
+        if not isinstance(row, Mapping):
+            raise ImportError_("each request must be an object")
+        digest = request_digest(row)
+        if row.get("request_sha256") != digest:
+            raise ImportError_("request digest does not match canonical request fields")
+        recomputed_digests.append(digest)
+    if expected_requests_hash != sha256_json(recomputed_digests):
+        raise ImportError_("tampered requests list")
+    if market_rates is not None:
+        _validate_market_rates(_require_mapping(market_rates, "market_rates"))
+    raw_responses = responses_payload.get("responses")
+    if not isinstance(raw_responses, list):
+        raise ImportError_("responses must be a list")
+    indexed = _index_responses(raw_responses)
+    expected = set(recomputed_digests)
     extra = set(indexed) - expected
     if extra:
         raise ImportError_("tampered or unknown request hashes in responses")
@@ -145,8 +199,8 @@ def import_responses(
             computed = market_generation_estimate(
                 measurements["tokens"]["input"],
                 measurements["tokens"]["output"],
-                rates.get("input_per_million"),
-                rates.get("output_per_million"),
+                rates.get("input_per_million") if isinstance(rates, Mapping) else None,
+                rates.get("output_per_million") if isinstance(rates, Mapping) else None,
             )
             provided = measurements["costs"]["market_generation_estimate"]
             if provided is not None and computed is None:
@@ -184,8 +238,9 @@ def import_responses(
                     record["costs"]["allocated_processing_cost"] = float(share) if share is not None else None
     return {
         "manifest": {
-            **requests_bundle["manifest"],
-            "import_sha256": sha256_json([row["request_sha256"] for row in records]),
+            **manifest,
+            "market_rates_sha256": sha256_json(market_rates) if market_rates is not None else None,
+            "import_sha256": sha256_json(records),
             "not_a_research_result": True,
         },
         "records": records,

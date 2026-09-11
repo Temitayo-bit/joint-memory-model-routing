@@ -28,7 +28,10 @@ if [[ -z "$deno_bin" ]]; then
   exit 1
 fi
 
-mapfile -t deno_files < <(find supabase/functions/text-baseline-pilot -name '*.ts' | sort)
+deno_files=()
+while IFS= read -r file; do
+  deno_files+=("$file")
+done < <(find supabase/functions/text-baseline-pilot -name '*.ts' | sort)
 "$deno_bin" check "${deno_files[@]}"
 "$deno_bin" test --check supabase/functions/text-baseline-pilot
 
@@ -43,6 +46,12 @@ required = (
     "verify_pilot_snapshot_ownership",
     "retrieve_pilot_memory",
     "extensions.vector(384)",
+    "operator(extensions.<=>)",
+    "claim_pilot_call",
+    "insert_pilot_pending",
+    "finalize_pilot_result",
+    "revoke all on table public.pilot_request_results",
+    "revoke all on table public.pilot_call_log",
 )
 missing = [item for item in required if item not in text]
 if missing:
@@ -53,11 +62,18 @@ PY
 if command -v supabase >/dev/null 2>&1; then
   if supabase db lint --help >/dev/null 2>&1; then
     set +e
-    supabase db lint
+    lint_output="$(supabase db lint 2>&1)"
     lint_status=$?
     set -e
     if [[ "$lint_status" -ne 0 ]]; then
-      echo "UNVERIFIED: supabase db lint did not succeed (needs a local database with plpgsql_check). Exit $lint_status." >&2
+      lower="$(printf '%s' "$lint_output" | tr '[:upper:]' '[:lower:]')"
+      if printf '%s' "$lower" | grep -Eq 'connect|connection|could not connect|database .* does not exist|no such host|dial tcp|refused|unavailable|not running|failed to connect'; then
+        echo "UNVERIFIED: supabase db lint could not reach a local database. Exit $lint_status." >&2
+      else
+        printf '%s\n' "$lint_output" >&2
+        echo "supabase db lint failed with exit $lint_status." >&2
+        exit "$lint_status"
+      fi
     fi
   else
     echo "UNVERIFIED: supabase db lint is unavailable in this CLI." >&2
