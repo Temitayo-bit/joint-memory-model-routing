@@ -12,8 +12,73 @@ PYTHONPATH=. python3 -m experiments.text_baseline export-requests --output /tmp/
 PYTHONPATH=. python3 -m experiments.text_baseline import-responses --requests /tmp/text-baseline-export/requests.json --responses /path/to/measured.json --output /tmp/text-baseline-import
 ```
 
-Mock mode writes placeholder answers and leaves latency, tokens, quality, and all three cost fields null. Existing output directories are refused.
+### Live runner (operator / Codex)
+
+Reads exported requests and calls an OpenAI-compatible endpoint. Secrets come only from environment variables and are never printed or written into artifacts.
+
+```sh
+export TEXT_BASELINE_MODEL_BASE_URL='https://<pod-proxy-host>'
+export TEXT_BASELINE_MODEL_BEARER='<inference-bearer>'
+export TEXT_BASELINE_SMALL_MODEL_ID='Qwen/Qwen3-4B-AWQ'
+export TEXT_BASELINE_LARGE_MODEL_ID='Qwen/Qwen3-14B-AWQ'
+
+PYTHONPATH=. python3 -m experiments.text_baseline run-live \
+  --requests /tmp/text-baseline-export/requests.json \
+  --output /tmp/text-baseline-live \
+  --transport direct \
+  --condition S0 --condition S1 \
+  --question-id Q10 \
+  --repeat 0 \
+  --max-requests 2 \
+  --hourly-rate 0.50 \
+  --gpu-type 'NVIDIA GeForce RTX 3090' \
+  --session-id sess-2026-09-11 \
+  --pod-id <pod-id> \
+  --model-revision 74d4bd2bd4bff9cafc9345221320bffb08b406a3 \
+  --quantization awq \
+  --server-version vllm-0.29.0
+```
+
+Optional Edge Function transport (allow-listed body only; no admin Supabase actions):
+
+```sh
+export TEXT_BASELINE_EDGE_FUNCTION_URL='https://<project>.functions.supabase.co/text-baseline-pilot'
+export TEXT_BASELINE_USER_JWT='<user-jwt>'
+
+PYTHONPATH=. python3 -m experiments.text_baseline run-live \
+  --requests /tmp/text-baseline-export/requests.json \
+  --output /tmp/text-baseline-edge \
+  --transport edge \
+  --snapshot-id <snapshot-uuid> \
+  --embeddings /tmp/embeddings-bundle.json \
+  --hourly-rate 0.50
+```
+
+`responses.json` is checkpointed after each request and is accepted by `import-responses`. Re-running the same `--output` resumes and skips completed digests.
+
+### Embedding bundle (offline; no Supabase writes)
+
+```sh
+# Requires local: pip install sentence-transformers
+PYTHONPATH=. python3 -m experiments.text_baseline prepare-embeddings \
+  --output /tmp/embeddings-bundle.json
+```
+
+### RunPod launch command generator (does not execute)
+
+```sh
+PYTHONPATH=. python3 -m experiments.text_baseline print-runpod-launch --model both
+```
+
+Pins:
+
+- Small: `Qwen/Qwen3-4B-AWQ` revision `74d4bd2bd4bff9cafc9345221320bffb08b406a3`
+- Large: `Qwen/Qwen3-14B-AWQ` revision `31c69efc29464b6bb0aee1398b5a7b50a99340c3`
+- Image: `vllm/vllm-openai:v0.29.0`
+- Includes `--generation-config vllm` and the fixed generation settings in the printed JSON
+
+Mock mode writes placeholder answers and leaves latency, tokens, quality, and all three cost fields null. Existing output directories for mock/export/import are refused.
 
 Scoring anchors in `data/scoring_anchors.json` are not loaded when prompts are built.
 
-The supervised live client in `live_client.py` only constructs the allow-listed JSON body. It does not call Supabase or a model server.
+Active-inference processing cost per answer is `(model_http_ms / 3_600_000) * hourly_rate`. Session rental/service spending stays in `session.session_actuals` only and is never copied into per-answer cost fields. First-token latency stays null for non-streaming requests.

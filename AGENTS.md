@@ -6,7 +6,7 @@ Read `architecture.md` before changing the system. It is the living source of tr
 
 This CSCI 499 Senior Research repository supports **Joint Memory and Model Routing for Latency-Constrained Voice Agents**. The contribution is the controller that jointly decides whether to retrieve long-term memory and whether to use a small or larger language model. A polished voice interface is supporting infrastructure, not the research claim.
 
-Start with text-based, reproducible experiments. Add voice only after the controller and measurements are working.
+Establish the four fixed model/memory baselines in text and then voice before designing the controller. Evaluate the controller in both modalities afterward.
 
 ## Core rules
 
@@ -35,6 +35,10 @@ Delete attached pod storage at shutdown. A deliberately retained Network Volume 
 Use a 24 GB GPU for normal integration and evaluation work. Use 48 GB only for a planned larger-model condition. Keep a per-session cost record in `docs/operations/gpu-session-log.md` and stay within the user’s $75 semester cap.
 
 ## Planning and implementation workflow
+
+Codex is the planning, coordination, experiment-operation, and infrastructure-operation agent working with the user. When repository implementation, debugging, test writing or fixing, code review, or local development setup is ready, Codex gives the user a complete, copy-ready prompt for the user-operated local Cursor agent with the local checkout path, working-tree state, constraints, test and review status, and prohibited external actions. The user opens that local checkout and sends the prompt to Cursor. Cursor does not run real experiments or operate remote infrastructure: the user and Codex together handle Supabase migrations and deployments, RunPod provisioning and shutdown, live requests, result capture, and cost verification. Codex does not launch Cursor, implement or review code in parallel, or substitute Codex subagents unless the user explicitly overrides this workflow.
+
+Codex must warn the user when it estimates that the current conversation is near 80% of its available context window. Because the application does not expose an exact context percentage to the model, treat this as an early best-effort threshold. At that point, write a concise current-state handoff containing completed work, verified external state, active resources and costs, repository path and Git state, uncommitted files, decisions, blockers, and exact next actions. Then provide a copy-ready onboarding prompt for a fresh Codex task before continuing context-heavy work.
 
 1. For a change involving external services, data flow, pricing, or architecture, use `.agents/skills/design-research/` before writing its spec. Verify time-sensitive claims from primary sources.
 2. Write a dated spec in `docs/specs/`, then an executable one-time plan in `docs/plans/`.
