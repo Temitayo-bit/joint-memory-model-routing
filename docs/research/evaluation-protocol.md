@@ -8,11 +8,12 @@ Does a joint controller for memory retrieval and small-versus-large model select
 
 ## Text-first milestones
 
-1. Build a deterministic local test harness with synthetic fixtures and known expected controller decisions.
-2. Establish no-memory/always-small and no-memory/always-large baselines.
-3. Add retrieve-then-small and retrieve-then-large conditions.
-4. Evaluate a joint adaptive controller only after its individual signals are logged and inspectable.
-5. Add controlled speech recognition and voice-pipeline measurements later, reporting their latency separately.
+1. Establish fixed text baselines S0, S1, L0, and L1 with a deterministic local harness (synthetic fixtures; scoring anchors never enter prompts).
+2. Repeat those four conditions on a voice pipeline, reporting speech latency separately.
+3. Design a joint controller only after the fixed baselines exist and routing signals are logged and inspectable.
+4. Evaluate the controller on text, then on voice.
+
+Do not treat local lexical fixture retrieval as the final semantic retrieval system. Do not report mock or fixture output as experimental results.
 
 ## Required recording per run
 

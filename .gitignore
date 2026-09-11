@@ -15,7 +15,9 @@ dist/
 build/
 .next/
 
-# Research artifacts that must be stored through an approved data workflow
+# Locally generated experiment outputs
+experiments/text_baseline/runs/
+experiments/text_baseline/outputs/
 data/raw/
 data/private/
 artifacts/
@@ -30,6 +32,10 @@ audio/
 
 # Locally downloaded RunPod CLI binary
 tools/runpodctl
+
+# Local agent scratch trees (not part of the research artifact)
+_local-wip-backup/
+pr2-checkout/
 
 # Vendor-maintained skills are installed locally; source and exact hashes are
 # recorded in skills-lock.json. Keep only this project's custom workflows in Git.

@@ -17,6 +17,11 @@ required_files=(
   docs/specs/2026-09-09-vercel-supabase-runpod-deployment-design.md
   docs/design/diagrams/2026-09-09-vercel-supabase-runpod.svg
   docs/research/evaluation-protocol.md
+  docs/specs/2026-09-11-text-baseline-harness-design.md
+  docs/design/diagrams/2026-09-11-text-baseline-harness.svg
+  docs/plans/2026-09-11-text-baseline-harness.md
+  experiments/text_baseline/README.md
+  supabase/migrations/20260911000000_pilot_text_baseline.sql
   .github/pull_request_template.md
 )
 

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: CI
 
 on:
@@ -16,6 +17,14 @@ jobs:
     steps:
       # v4.2.2 — pinned to a reviewed immutable commit for public-repository CI.
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      # v7.0.0 — https://github.com/actions/setup-python/releases/tag/v7.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+      # v2.0.5 — https://github.com/denoland/setup-deno/releases/tag/v2.0.5
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: "2.9.6"
       - name: Run repository tests
         run: make test
 
@@ -25,5 +34,13 @@ jobs:
     steps:
       # v4.2.2 — pinned to a reviewed immutable commit for public-repository CI.
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      # v7.0.0 — https://github.com/actions/setup-python/releases/tag/v7.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+      # v2.0.5 — https://github.com/denoland/setup-deno/releases/tag/v2.0.5
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: "2.9.6"
       - name: Run repository build gate
         run: make build

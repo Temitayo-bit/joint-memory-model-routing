@@ -1,0 +1,4 @@
+# Prepared locally. Do not deploy and do not link a remote project from CI.
+
+[functions.text-baseline-pilot]
+verify_jwt = true
