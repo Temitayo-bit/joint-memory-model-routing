@@ -18,6 +18,7 @@ REJECTED_CLIENT_KEYS = frozenset(
         "temperature",
         "top_p",
         "top_k",
+        "min_p",
         "seed",
         "max_tokens",
         "prompt",

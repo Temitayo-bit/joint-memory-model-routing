@@ -21,6 +21,7 @@ export const REJECTED_CLIENT_KEYS = [
   "temperature",
   "top_p",
   "top_k",
+  "min_p",
   "seed",
   "max_tokens",
   "prompt",

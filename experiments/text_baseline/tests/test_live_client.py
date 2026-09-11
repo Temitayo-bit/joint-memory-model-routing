@@ -39,6 +39,14 @@ class LiveClientTests(unittest.TestCase):
                 extra={"model_url": "https://example.invalid"},
             )
         with self.assertRaises(LiveClientError):
+            build_live_request(
+                str(uuid.uuid4()),
+                str(uuid.uuid4()),
+                "q",
+                "S0",
+                extra={"min_p": 0.1},
+            )
+        with self.assertRaises(LiveClientError):
             validate_embedding([0.1] * 10)
         with self.assertRaises(LiveClientError):
             validate_embedding([0.0] * 384)

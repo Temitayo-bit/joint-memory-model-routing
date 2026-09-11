@@ -20,7 +20,7 @@ A local Python harness produces the complete 12-question × 4-condition matrix, 
 
 ## Verified claims — checked 2026-09-11
 
-- Qwen3 non-thinking sampling guidance is temperature **0.7**, top_p **0.8**, top_k **20**, and min_p **0**. Source: [Qwen3 quickstart](https://qwen.readthedocs.io/en/latest/getting_started/quickstart.html). This repository adopts those sampling values plus `max_tokens = 256` and `seed = 42` as **fixed request settings**. It does not claim that any Qwen artifact, quantization, or server has been verified on this project's infrastructure.
+- Qwen3 non-thinking sampling guidance is temperature **0.7**, top_p **0.8**, top_k **20**, and min_p **0**. Source: [Qwen3 quickstart](https://qwen.readthedocs.io/en/latest/getting_started/quickstart.html) (rechecked 2026-09-11). This repository adopts those sampling values plus `max_tokens = 256` and `seed = 42` as **fixed request settings**, and the live Edge Function and exported harness manifest both emit `min_p: 0` explicitly. It does not claim that any Qwen artifact, quantization, or server has been verified on this project's infrastructure.
 - Hybrid Qwen3 models expose a hard switch `enable_thinking=False` / `chat_template_kwargs.enable_thinking = false` for non-thinking mode on OpenAI-compatible servers. Source: [Qwen3 quickstart](https://qwen.readthedocs.io/en/latest/getting_started/quickstart.html). Whether the yet-unselected self-hosted server honors that field is unverified.
 - `sentence-transformers/all-MiniLM-L6-v2` maps text to a **384-dimensional** vector. Source: [model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2). The live path therefore stores `extensions.vector(384)` and requires a client-supplied unit vector of length 384 for memory conditions. The laptop embedding step is not executed in this change.
 - Supabase documents `extensions.vector(384)` columns, cosine distance `<=>`, and wrapping similarity queries in Postgres functions because PostgREST does not expose vector operators. Source: [Vector columns](https://supabase.com/docs/guides/ai/vector-columns).
@@ -93,6 +93,7 @@ Fixed generation body (non-streaming):
   "temperature": 0.7,
   "top_p": 0.8,
   "top_k": 20,
+  "min_p": 0,
   "seed": 42,
   "chat_template_kwargs": { "enable_thinking": false }
 }
@@ -111,7 +112,7 @@ See [the harness diagram](../design/diagrams/2026-09-11-text-baseline-harness.sv
 
 - Exact small and large open-weight artifacts, revisions, and quantization on the future RunPod server are unselected. Settle by recording the served `/v1/models` (or equivalent) output in a dated operations note after a **planned** GPU session.
 - Official `withSupabase({ auth: 'user' })` packaging against this project's Edge runtime is unverified. Settle by wrapping `handlePilotRequest` with the pinned `@supabase/server` package during the first supervised deploy rehearsal.
-- Whether the self-hosted server accepts `chat_template_kwargs.enable_thinking`, `top_k`, and `seed` is unverified. Settle with one supervised non-billing probe that inspects the request echo or server docs for the chosen image — without treating the probe as an experimental result.
+- Whether the self-hosted server accepts `chat_template_kwargs.enable_thinking`, `top_k`, `min_p`, and `seed` is unverified. Settle with one supervised non-billing probe that inspects the request echo or server docs for the chosen image — without treating the probe as an experimental result. Keep sending the fixed body (including `min_p: 0`) unless that probe shows the selected server rejects the field.
 - This project's JWT algorithm (legacy HMAC secret versus JWKS) is unverified against the live Supabase project. The prepared function relies on platform `verify_jwt` plus application-level claims checks. Settle by inspecting the project's Auth JWT settings before first live call.
 - `plpgsql_check` / `supabase db lint` against a local Postgres with `pgvector` is not available in every environment. Settle by running `supabase db lint` after `supabase db start` on a machine with the CLI and Docker.
 - all-MiniLM-L6-v2 encoding quality on the twelve synthetic questions is unverified. Settle when the laptop embedding step is actually run.
