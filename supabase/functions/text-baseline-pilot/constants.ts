@@ -6,6 +6,20 @@ export const EMBEDDING_DIMS = 384;
 export const NORM_TOLERANCE = 1e-3;
 export const MAX_REQUEST_BYTES = 16 * 1024;
 export const MAX_MODEL_RESPONSE_BYTES = 64 * 1024;
+export const RETRIEVAL_LIMIT = 4;
+export const RETRIEVAL_LIMIT_CAP = 8;
+export const RETRIEVER_VERSION = "pilot_hybrid_v2";
+export const RETRIEVAL_CONFIG = Object.freeze({
+  retriever: RETRIEVER_VERSION,
+  lexical: "snapshot_idf_token_overlap",
+  vector: "cosine_similarity_1_minus_distance",
+  combined: "lexical_rank_plus_vector_similarity",
+  limit: RETRIEVAL_LIMIT,
+  limit_cap: RETRIEVAL_LIMIT_CAP,
+  token_pattern: "[A-Za-z0-9]+",
+  idf: "ln((N+1)/(df+1))+1",
+  not_semantic_retrieval: true,
+});
 export const ALLOWED_BODY_KEYS = new Set([
   "request_id",
   "snapshot_id",

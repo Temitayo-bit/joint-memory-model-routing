@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from experiments.text_baseline.constants import FIXED_GENERATION, MEMORY_CONDITIONS, NO_MEMORY_CONDITIONS
+from experiments.text_baseline.constants import (
+    FIXED_GENERATION,
+    MEMORY_CONDITIONS,
+    NO_MEMORY_CONDITIONS,
+    RETRIEVAL_CONFIG,
+)
 from experiments.text_baseline.costs import empty_cost_fields, session_actuals_template
 from experiments.text_baseline.fixtures import fixture_hashes, load_memory, load_questions
 from experiments.text_baseline.hashing import sha256_json
@@ -96,6 +101,7 @@ def build_requests(
         "schedule_sha256": schedule_hash(cells),
         "fixture_hashes": hashes,
         "fixed_generation": dict(FIXED_GENERATION),
+        "retrieval": dict(RETRIEVAL_CONFIG),
         "session_actuals": dict(session_actuals_template()),
         "requests_sha256": sha256_json([row["request_sha256"] for row in requests]),
     }

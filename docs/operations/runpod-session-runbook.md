@@ -16,6 +16,10 @@ PYTHONPATH=. python3 -m experiments.text_baseline print-runpod-launch --model la
 
 Use the digest-pinned image from the printed JSON (`vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1`, tag alias `v0.29.0`). Small model `Qwen/Qwen3-4B-AWQ` at revision `74d4bd2bd4bff9cafc9345221320bffb08b406a3`. Large model `Qwen/Qwen3-14B-AWQ` at revision `31c69efc29464b6bb0aee1398b5a7b50a99340c3`. The start command must include `--generation-config vllm`. Clients must send the fixed generation body (`stream false`, `max_tokens 256`, `temperature 0.7`, `top_p 0.8`, `top_k 20`, `min_p 0`, `seed 42`, thinking disabled).
 
+## Retrieval condition (pilot_hybrid_v2)
+
+Memory-enabled live runs (S1/L1 via Edge + `retrieve_pilot_memory`) use **pilot_hybrid_v2**: snapshot-local IDF token overlap plus cosine similarity, default limit 4 (cap 8). This is a **new retrieval condition** relative to the completed v1 text baseline. After applying `20260912180000_retrieve_pilot_memory_v2.sql` and redeploying `text-baseline-pilot`, re-run **S1 and L1 text baselines** and record the v2 retriever config before collecting voice baselines under the same memory path. Do not alter or delete recorded v1 results.
+
 ## During the session
 
 1. Use a self-hosted model server and record the exact image digest, model revision, quantization, configuration, and start/end time needed to reproduce the run.
