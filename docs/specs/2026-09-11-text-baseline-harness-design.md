@@ -59,7 +59,7 @@ Mock mode leaves latency, token usage, quality, and all three cost fields `null`
 ## Local harness behavior
 
 - Twelve synthetic questions: four memory-answerable, four general-knowledge, four where memory and general knowledge may both contribute.
-- Memory fixtures, questions, and scoring anchors live in separate files. Prompt construction may read questions and memory fixtures only. Local harness retrieval for memory conditions uses the **pilot_hybrid_v2** snapshot-IDF mirror described in [the retrieval-v2 design](2026-09-12-retrieval-v2-idf-lexical-design.md); it remains plumbing validation, not the measured semantic system.
+- Memory fixtures, questions, and scoring anchors live in separate files. Prompt construction may read questions and memory fixtures only. Local harness retrieval for memory conditions uses the **pilot_hybrid_v2_1** snapshot-IDF mirror described in [the retrieval-v2.1 design](2026-09-12-retrieval-v2-1-stopwords-design.md); it remains plumbing validation, not the measured semantic system.
 - One repeat yields all 48 question-condition pairs. Repeats are bounded (`1..5`). A seed shuffles the schedule reproducibly.
 - S0 and L0 never call retrieval. S1 and L1 receive identical retrieved evidence for the same question, repeat index, and fixture hash.
 - Facts and source passages are both memory items.

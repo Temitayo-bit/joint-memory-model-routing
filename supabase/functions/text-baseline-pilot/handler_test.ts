@@ -189,7 +189,7 @@ Deno.test("evidence canonical JSON matches the Python harness shape", () => {
   ]);
   assertEquals(
     encoded,
-    '{"combined":"lexical_rank_plus_vector_similarity","idf":"ln((N+1)/(df+1))+1","items":[{"content":"hello","id":"M01","kind":"fact"}],"lexical":"snapshot_idf_token_overlap","limit":4,"limit_cap":8,"not_semantic_retrieval":true,"retriever":"pilot_hybrid_v2","token_pattern":"[A-Za-z0-9]+","vector":"cosine_similarity_1_minus_distance"}',
+    '{"combined":"lexical_rank_plus_vector_similarity","idf":"ln((N+1)/(df+1))+1","items":[{"content":"hello","id":"M01","kind":"fact"}],"lexical":"snapshot_idf_token_overlap","limit":4,"limit_cap":8,"not_semantic_retrieval":true,"retriever":"pilot_hybrid_v2_1","stopword_count":127,"stopword_source":"https://raw.githubusercontent.com/postgres/postgres/REL_17_STABLE/src/backend/snowball/stopwords/english.stop","stopwords":"postgresql_17_english_snowball","token_pattern":"[A-Za-z0-9]+","vector":"cosine_similarity_1_minus_distance"}',
   );
 });
 

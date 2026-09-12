@@ -8,7 +8,11 @@ export const MAX_REQUEST_BYTES = 16 * 1024;
 export const MAX_MODEL_RESPONSE_BYTES = 64 * 1024;
 export const RETRIEVAL_LIMIT = 4;
 export const RETRIEVAL_LIMIT_CAP = 8;
-export const RETRIEVER_VERSION = "pilot_hybrid_v2";
+export const STOPWORD_SET_ID = "postgresql_17_english_snowball";
+export const STOPWORD_COUNT = 127;
+export const STOPWORD_SOURCE =
+  "https://raw.githubusercontent.com/postgres/postgres/REL_17_STABLE/src/backend/snowball/stopwords/english.stop";
+export const RETRIEVER_VERSION = "pilot_hybrid_v2_1";
 export const RETRIEVAL_CONFIG = Object.freeze({
   retriever: RETRIEVER_VERSION,
   lexical: "snapshot_idf_token_overlap",
@@ -18,6 +22,9 @@ export const RETRIEVAL_CONFIG = Object.freeze({
   limit_cap: RETRIEVAL_LIMIT_CAP,
   token_pattern: "[A-Za-z0-9]+",
   idf: "ln((N+1)/(df+1))+1",
+  stopwords: STOPWORD_SET_ID,
+  stopword_count: STOPWORD_COUNT,
+  stopword_source: STOPWORD_SOURCE,
   not_semantic_retrieval: true,
 });
 export const ALLOWED_BODY_KEYS = new Set([

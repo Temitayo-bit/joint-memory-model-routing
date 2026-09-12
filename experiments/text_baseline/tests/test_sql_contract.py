@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 MIGRATION = ROOT / "supabase" / "migrations" / "20260911000000_pilot_text_baseline.sql"
 V2_MIGRATION = ROOT / "supabase" / "migrations" / "20260912180000_retrieve_pilot_memory_v2.sql"
+V21_MIGRATION = ROOT / "supabase" / "migrations" / "20260912210000_retrieve_pilot_memory_v2_1.sql"
 FK_INDEX_MIGRATION = ROOT / "supabase" / "migrations" / "20260912043729_add_pilot_fk_indexes.sql"
 CONFIG = ROOT / "supabase" / "config.toml"
 EVIDENCE_TS = ROOT / "supabase" / "functions" / "text-baseline-pilot" / "evidence.ts"
@@ -36,6 +37,7 @@ class SqlContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.sql = MIGRATION.read_text(encoding="utf-8")
         self.v2_sql = V2_MIGRATION.read_text(encoding="utf-8")
+        self.v21_sql = V21_MIGRATION.read_text(encoding="utf-8")
         self.fk_sql = FK_INDEX_MIGRATION.read_text(encoding="utf-8")
         self.config = CONFIG.read_text(encoding="utf-8")
         self.evidence_ts = EVIDENCE_TS.read_text(encoding="utf-8")
@@ -48,6 +50,7 @@ class SqlContractTests(unittest.TestCase):
         self.assertIn("enable row level security", self.sql)
         self.assertNotIn("service_role", self.sql)
         self.assertNotIn("service_role", self.v2_sql)
+        self.assertNotIn("service_role", self.v21_sql)
         # Narrow write RPCs may be SECURITY DEFINER; every other function stays invoker.
         for name in ("claim_pilot_call", "insert_pilot_pending", "finalize_pilot_result"):
             self.assertIn(name, self.sql)
@@ -94,8 +97,35 @@ class SqlContractTests(unittest.TestCase):
         # Historical v1 migration retains the original plainto path for auditability.
         self.assertIn("plainto_tsquery", self.sql)
 
-    def test_edge_records_v2_retriever_and_limit(self) -> None:
-        self.assertIn('RETRIEVER_VERSION = "pilot_hybrid_v2"', self.constants_ts)
+    def test_v21_retrieval_adds_stopwords_without_editing_v2_file(self) -> None:
+        self.assertIn("create or replace function public.retrieve_pilot_memory", self.v21_sql)
+        self.assertIn("security invoker", self.v21_sql)
+        self.assertIn("set search_path = ''", self.v21_sql)
+        self.assertIn("s.owner_id = (select auth.uid())", self.v21_sql)
+        self.assertIn("public.pilot_supervised()", self.v21_sql)
+        self.assertIn("operator(extensions.<=>)", self.v21_sql)
+        self.assertIn("pilot_hybrid_v2_1", self.v21_sql)
+        self.assertIn("postgresql_17_english_snowball", self.v21_sql)
+        self.assertIn("english_stopwords", self.v21_sql)
+        self.assertIn("ln((", self.v21_sql)
+        self.assertIn("limit least(greatest(coalesce(p_limit, 4), 1), 8)", self.v21_sql)
+        self.assertNotIn("plainto_tsquery", self.v21_sql)
+        self.assertNotRegex(self.v21_sql, r"(?im)^\s*grant\s+")
+        self.assertNotRegex(self.v21_sql, r"(?im)^\s*revoke\s+")
+        self.assertNotRegex(self.v21_sql, r"(?im)^\s*create\s+policy\b")
+        self.assertNotRegex(self.v21_sql, r"(?im)^\s*alter\s+table\b")
+        # Historical v2 migration remains untouched and still documents pilot_hybrid_v2.
+        self.assertIn("pilot_hybrid_v2", self.v2_sql)
+        self.assertNotIn("pilot_hybrid_v2_1", self.v2_sql)
+        self.assertNotIn("english_stopwords", self.v2_sql)
+        # 127-word stopword list is present once as the unnest source array.
+        stopword_literals = len(re.findall(r"'[a-z]+'", self.v21_sql.split("english_stopwords", 1)[1].split("scoped_items", 1)[0]))
+        self.assertEqual(stopword_literals, 127)
+
+    def test_edge_records_v21_retriever_stopwords_and_limit(self) -> None:
+        self.assertIn('RETRIEVER_VERSION = "pilot_hybrid_v2_1"', self.constants_ts)
+        self.assertIn('STOPWORD_SET_ID = "postgresql_17_english_snowball"', self.constants_ts)
+        self.assertIn("STOPWORD_COUNT = 127", self.constants_ts)
         self.assertIn("RETRIEVAL_LIMIT = 4", self.constants_ts)
         self.assertIn("snapshot_idf_token_overlap", self.constants_ts)
         self.assertIn("RETRIEVAL_CONFIG", self.evidence_ts)

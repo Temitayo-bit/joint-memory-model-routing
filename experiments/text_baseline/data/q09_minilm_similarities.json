@@ -1,0 +1,25 @@
+{
+  "not_a_research_result": true,
+  "question_id": "Q09",
+  "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+  "model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "dims": 384,
+  "source_bundle_path": "artifacts/preflight/2026-09-12-text-baseline-retrieval-v2-export/embeddings-bundle.json",
+  "source_bundle_sha256": "54680c28ef4832dd95a29e68ee05765b44c1bbe0fa9f3f87c8431e16698e0432",
+  "similarity_metric": "cosine_dot_of_unit_vectors",
+  "note": "Pinned Q09 cosine similarities derived from the existing v2 MiniLM embeddings-bundle export. Values are measured from that bundle, not fabricated ranks.",
+  "vector_similarity_by_id": {
+    "M01": 0.27559536086863706,
+    "M02": 0.2572474755891469,
+    "M03": 0.2401042985051481,
+    "M04": 0.1562193596395049,
+    "M05": 0.2796802691112604,
+    "M06": 0.3201220244320662,
+    "M07": 0.36946349092329894,
+    "P01": 0.17598338366465127,
+    "P02": 0.18481500667975576,
+    "P03": 0.31354578358520097,
+    "P04": 0.29383388697066065,
+    "P05": 0.22565798466640608
+  }
+}
