@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+<title id="title">Pilot hybrid retrieval v2</title>
+<desc id="desc">Laptop holds fixtures and optional embeddings. Authenticated Edge Function calls SECURITY INVOKER retrieve_pilot_memory. Ranking uses snapshot-local IDF token overlap plus vector similarity inside Supabase. Scoring anchors never enter the model prompt. Model server traffic is transient.</desc>
+<style>
+  text{font-family:Arial,sans-serif;fill:#172033}
+  .z{fill:#f8fafc;stroke:#94a3b8;stroke-width:2;stroke-dasharray:7 5}
+  .c{stroke:#334155;stroke-width:2}
+  .h{font-size:16px;font-weight:bold}
+  .b{font-size:13px}
+  .s{font-size:12px;fill:#475569}
+  .q{stroke:#2563eb;stroke-width:3;fill:none;marker-end:url(#a)}
+  .r{stroke:#059669;stroke-width:3;fill:none;marker-end:url(#g)}
+  .x{stroke:#b45309;stroke-width:2;fill:none;stroke-dasharray:4 4;marker-end:url(#o)}
+</style>
+<defs>
+  <marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#2563eb"/></marker>
+  <marker id="g" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#059669"/></marker>
+  <marker id="o" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L0 6L9 3z" fill="#b45309"/></marker>
+</defs>
+<rect width="1280" height="720" fill="white"/>
+<text x="32" y="36" class="h" font-size="22">pilot_hybrid_v2  IDF lexical + vector hybrid (limit 4)</text>
+<text x="32" y="58" class="s">Blue: query/embedding. Green: ranked evidence retained in result metadata. Amber: scoring anchors never leave the laptop into prompts.</text>
+
+<rect x="24" y="80" width="380" height="600" class="z"/>
+<text x="40" y="108" class="h">Laptop / local workspace</text>
+<text x="40" y="128" class="s">Transient. Not durable research memory.</text>
+<rect x="44" y="148" width="340" height="90" class="c" fill="#f1f5f9" rx="10"/>
+<text x="60" y="176" class="h">Frozen fixtures</text>
+<text x="60" y="198" class="b">questions + memory snapshot v1</text>
+<text x="60" y="218" class="s">unchanged content; v2 only changes ranking</text>
+<rect x="44" y="256" width="340" height="90" class="c" fill="#fff7ed" rx="10"/>
+<text x="60" y="284" class="h">scoring_anchors.json</text>
+<text x="60" y="306" class="b">local scoring only</text>
+<text x="60" y="326" class="s">never in Edge body or model prompt</text>
+<rect x="44" y="364" width="340" height="110" class="c" fill="#eef2ff" rx="10"/>
+<text x="60" y="392" class="h">Local IDF mirror (plumbing)</text>
+<text x="60" y="414" class="b">same token + IDF rules as SQL</text>
+<text x="60" y="434" class="s">no vectors locally; not a research result</text>
+<text x="60" y="454" class="s">records retriever=pilot_hybrid_v2</text>
+<rect x="44" y="494" width="340" height="90" class="c" fill="#f1f5f9" rx="10"/>
+<text x="60" y="522" class="h">Live client</text>
+<text x="60" y="544" class="b">JWT + allow-listed JSON</text>
+<text x="60" y="564" class="s">question, condition, 384-d unit vector</text>
+
+<rect x="440" y="80" width="400" height="600" class="z"/>
+<text x="456" y="108" class="h">Supabase (durable)</text>
+<text x="456" y="128" class="s">RLS + supervised invoker RPCs</text>
+<rect x="460" y="148" width="360" height="100" class="c" fill="#ecfdf5" rx="10"/>
+<text x="476" y="176" class="h">Edge Function text-baseline-pilot</text>
+<text x="476" y="198" class="b">ownership check; S1/L1 retrieve</text>
+<text x="476" y="218" class="s">evidence hash labels pilot_hybrid_v2</text>
+<rect x="460" y="268" width="360" height="180" class="c" fill="#f1f5f9" rx="10"/>
+<text x="476" y="296" class="h">retrieve_pilot_memory v2</text>
+<text x="476" y="318" class="b">1. tokenize query + docs [A-Za-z0-9]+</text>
+<text x="476" y="338" class="b">2. idf = ln((N+1)/(df+1))+1</text>
+<text x="476" y="358" class="b">3. lexical = sum idf(Q)d) / sum idf(Q)</text>
+<text x="476" y="378" class="b">4. vector = 1  cosine distance</text>
+<text x="476" y="398" class="b">5. combined = lexical + vector; top 4</text>
+<text x="476" y="424" class="s">SECURITY INVOKER · search_path '' · owner_id</text>
+<rect x="460" y="468" width="360" height="100" class="c" fill="#ecfdf5" rx="10"/>
+<text x="476" y="496" class="h">pilot_memory_snapshots / items</text>
+<text x="476" y="518" class="b">Durable synthetic snapshot rows</text>
+<text x="476" y="538" class="s">v1 result rows retained; v2 is a new condition</text>
+<rect x="460" y="588" width="360" height="70" class="c" fill="#fef3c7" rx="10"/>
+<text x="476" y="616" class="b">v1 plainto_tsquery AND path retired</text>
+<text x="476" y="636" class="s">do not delete recorded v1 artifacts</text>
+
+<rect x="880" y="80" width="376" height="600" class="z"/>
+<text x="896" y="108" class="h">Transient model compute</text>
+<text x="896" y="128" class="s">RunPod / local direct  disposable</text>
+<rect x="896" y="160" width="344" height="120" class="c" fill="#f1f5f9" rx="10"/>
+<text x="912" y="188" class="h">Model server</text>
+<text x="912" y="210" class="b">Fixed generation settings</text>
+<text x="912" y="230" class="s">Prompt may include top-4 evidence</text>
+<text x="912" y="250" class="s">No JWT, no Supabase secrets</text>
+<rect x="896" y="308" width="344" height="140" class="c" fill="#fef2f2" rx="10"/>
+<text x="912" y="336" class="h">Not sent</text>
+<text x="912" y="358" class="b">scoring anchors</text>
+<text x="912" y="378" class="b">service_role keys</text>
+<text x="912" y="398" class="b">operator bearer except Edge secret</text>
+<text x="912" y="424" class="s">Trust boundary stays at Edge ’ model HTTP</text>
+<rect x="896" y="476" width="344" height="120" class="c" fill="#eef2ff" rx="10"/>
+<text x="912" y="504" class="h">Operator follow-up</text>
+<text x="912" y="526" class="b">Apply migration + redeploy EF</text>
+<text x="912" y="546" class="b">Re-run S1/L1 text before voice</text>
+<text x="912" y="566" class="s">Record v2 config in run manifests</text>
+
+<path class="q" d="M384 540 H440 H460"/>
+<path class="q" d="M640 248 V268"/>
+<path class="r" d="M820 200 H880 H896"/>
+<path class="x" d="M384 300 C520 300, 700 380, 896 380"/>
+<text x="700" y="372" class="s">anchors blocked</text>
+</svg>

@@ -2,7 +2,7 @@
 
 Keep documentation connected to actual decisions and evidence. Do not write speculative implementation notes as if they were established system behavior.
 
-- `specs/` contains dated architecture or implementation specifications, including verified claims and unverified assumptions. The text-baseline harness decision is [2026-09-11-text-baseline-harness-design.md](specs/2026-09-11-text-baseline-harness-design.md).
+- `specs/` contains dated architecture or implementation specifications, including verified claims and unverified assumptions. The text-baseline harness decision is [2026-09-11-text-baseline-harness-design.md](specs/2026-09-11-text-baseline-harness-design.md). Retrieval v2 (pilot_hybrid_v2 IDF lexical correction) is [2026-09-12-retrieval-v2-idf-lexical-design.md](specs/2026-09-12-retrieval-v2-idf-lexical-design.md).
 - `plans/` contains executable one-time plans. Completed plans remain historical records.
 - `research/` contains evaluation protocols, benchmark notes, and interpretation grounded in saved evidence.
 - `operations/` contains RunPod session, shutdown, and cost records.

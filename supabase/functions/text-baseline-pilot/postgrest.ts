@@ -1,6 +1,6 @@
 import type { PilotDb, PendingRow, FinalPatch, SessionSettings } from "./handler.ts";
 import type { EvidenceItem } from "./prompt.ts";
-import { UPSTREAM_TIMEOUT_MS } from "./constants.ts";
+import { RETRIEVAL_LIMIT, UPSTREAM_TIMEOUT_MS } from "./constants.ts";
 
 export type PostgrestConfig = {
   url: string;
@@ -77,7 +77,7 @@ export function createPostgrestDb(config: PostgrestConfig): PilotDb {
           p_snapshot_id: snapshotId,
           p_query_text: question,
           p_query_embedding: embedding,
-          p_limit: 4,
+          p_limit: RETRIEVAL_LIMIT,
         }),
       });
       return data ?? [];

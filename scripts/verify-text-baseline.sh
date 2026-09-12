@@ -36,9 +36,11 @@ done < <(find supabase/functions/text-baseline-pilot -name '*.ts' | sort)
 "$deno_bin" test --check supabase/functions/text-baseline-pilot
 
 sql_file="supabase/migrations/20260911000000_pilot_text_baseline.sql"
-python3 - "$sql_file" <<'PY'
+v2_sql_file="supabase/migrations/20260912180000_retrieve_pilot_memory_v2.sql"
+python3 - "$sql_file" "$v2_sql_file" <<'PY'
 import pathlib, sys
 text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+v2 = pathlib.Path(sys.argv[2]).read_text(encoding="utf-8")
 required = (
     "security invoker",
     "set search_path = ''",
@@ -65,6 +67,23 @@ forbidden = (
 leaked = [item for item in forbidden if item in text]
 if leaked:
     raise SystemExit("SQL contract forbids: %s" % leaked)
+v2_required = (
+    "create or replace function public.retrieve_pilot_memory",
+    "security invoker",
+    "set search_path = ''",
+    "pilot_hybrid_v2",
+    "s.owner_id = (select auth.uid())",
+    "public.pilot_supervised()",
+    "operator(extensions.<=>)",
+    "limit least(greatest(coalesce(p_limit, 4), 1), 8)",
+)
+v2_missing = [item for item in v2_required if item not in v2]
+if v2_missing:
+    raise SystemExit("v2 SQL contract missing: %s" % v2_missing)
+if "plainto_tsquery" in v2:
+    raise SystemExit("v2 SQL must not use plainto_tsquery")
+if "service_role" in v2:
+    raise SystemExit("v2 SQL must not reference service_role")
 print("Static SQL migration contract presence checks passed (not live RLS execution).")
 PY
 

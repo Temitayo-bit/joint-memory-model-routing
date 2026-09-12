@@ -1,4 +1,5 @@
 import type { EvidenceItem } from "./prompt.ts";
+import { RETRIEVAL_CONFIG } from "./constants.ts";
 
 export function canonicalJson(value: unknown): string {
   if (value === null) return "null";
@@ -18,8 +19,7 @@ export function canonicalJson(value: unknown): string {
 
 export function evidencePayload(evidence: EvidenceItem[]) {
   return {
-    not_semantic_retrieval: true,
-    retriever: "lexical_fixture_plumbing",
+    ...RETRIEVAL_CONFIG,
     items: evidence.map((item) => ({
       content: item.content,
       id: item.item_id,

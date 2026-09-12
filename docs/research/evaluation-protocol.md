@@ -13,7 +13,7 @@ Does a joint controller for memory retrieval and small-versus-large model select
 3. Design a joint controller only after the fixed baselines exist and routing signals are logged and inspectable.
 4. Evaluate the controller on text, then on voice.
 
-Do not treat local lexical fixture retrieval as the final semantic retrieval system. Do not report mock or fixture output as experimental results.
+Do not treat local fixture retrieval as the final semantic retrieval system. Do not report mock or fixture output as experimental results. When the live hybrid retriever version changes (for example v1 `plainto_tsquery` versus v2 `pilot_hybrid_v2`), treat memory-enabled runs as a new retrieval condition: keep prior artifacts, record the new configuration, and re-run S1/L1 text before voice baselines that depend on that memory path.
 
 ## Required recording per run
 

@@ -2,7 +2,13 @@
 
 This package runs **fixed** conditions S0, S1, L0, and L1 on twelve synthetic questions. It does not implement a controller and does not claim experimental results.
 
-Local lexical overlap retrieval is **plumbing validation**, not the semantic retrieval system.
+Local retrieval uses **pilot_hybrid_v2** snapshot-local IDF token overlap for plumbing validation. It is not the measured semantic retrieval system. The live Supabase path uses the same lexical rule plus cosine similarity inside `retrieve_pilot_memory`.
+
+## Retrieval versioning
+
+- **v1** (`plainto_tsquery` AND lexical ranks): historical condition. Keep recorded v1 artifacts; do not alter or delete them.
+- **v2** (`pilot_hybrid_v2`): current retrieval condition. After the v2 SQL migration is applied and the Edge Function is redeployed, **re-run memory-enabled text baselines (S1 and L1) before any voice baselines** that claim the same retrieval setup. S0/L0 need not be re-collected solely for this retrieval change.
+- Manifests and evidence hashes record `retriever`, `limit` (4), `limit_cap` (8), and the IDF formula so runs are reproducible.
 
 ## Modes
 
