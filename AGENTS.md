@@ -35,7 +35,7 @@ Delete attached pod storage at shutdown. A deliberately retained Network Volume 
 
 Use a 24 GB GPU for normal integration and evaluation work. Use 48 GB only for a planned larger-model condition. Keep a per-session cost record in `docs/operations/gpu-session-log.md` and stay within the user’s $75 semester cap.
 
-For RunPod workloads that use only synthetic or otherwise approved non-sensitive data, check Community Cloud capacity and pricing first and provision the cheapest available compatible community pod. Check Secure Cloud only when no suitable community pod is available or when the workload's data sensitivity, credential scope, or compliance requirements specifically require secure infrastructure. Use a unique, narrowly scoped, temporary inference credential for each community-pod session; never expose durable Supabase or RunPod credentials to the pod, and rotate or revoke the temporary credential immediately after shutdown. Record the cloud type, GPU, and hourly rate with the session cost record.
+Use RunPod Secure Cloud by default for baseline collection, integration work, and any session where dependable provisioning, startup, or networking matters. Community Cloud is optional only for non-critical synthetic or otherwise approved non-sensitive experiments where interruptions, failed starts, and retries are acceptable; do not depend on it for canonical or time-sensitive runs. Regardless of cloud type, use a unique, narrowly scoped, temporary inference credential for each pod session; never expose durable Supabase or RunPod credentials to the pod, and rotate or revoke the temporary credential immediately after shutdown. Record the cloud type, GPU, and hourly rate with the session cost record.
 
 ## Planning and implementation workflow
 
