@@ -75,11 +75,12 @@ PYTHONPATH=. python3 -m experiments.text_baseline prepare-embeddings \
   --model-revision 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
 ```
 
-4. Optional Edge Function path after Supabase deploy (user JWT only; no service-role or admin actions from this CLI):
+4. Optional Edge Function path after Supabase deploy (user JWT in `Authorization`, publishable key in `apikey`; no service-role or admin actions from this CLI). Treat both as ephemeral operator secrets: never commit, log, screenshot, or write them into artifacts.
 
 ```sh
 export TEXT_BASELINE_EDGE_FUNCTION_URL='https://<project>.functions.supabase.co/text-baseline-pilot'
 export TEXT_BASELINE_USER_JWT='<user-jwt>'
+export TEXT_BASELINE_SUPABASE_PUBLISHABLE_KEY='<supabase-publishable-key>'
 PYTHONPATH=. python3 -m experiments.text_baseline run-live \
   --requests /tmp/text-baseline-export/requests.json \
   --output /tmp/text-baseline-edge \
