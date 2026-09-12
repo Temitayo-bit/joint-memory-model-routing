@@ -183,15 +183,27 @@ def rank_all_hybrid(
     question_text: str,
     items: Sequence[Mapping[str, Any]],
     vector_similarity_by_id: Mapping[str, float],
+    *,
+    apply_stopwords: bool = True,
 ) -> List[Dict[str, Any]]:
-    """Full hybrid ranking for tests (no top-k cut)."""
+    """Full hybrid ranking for tests (no top-k cut).
+
+    Set ``apply_stopwords=False`` to reproduce historical pilot_hybrid_v2
+    lexical ranks without the v2.1 English Snowball filter.
+    """
     documents = [str(item["content"]) for item in items]
     n_docs = len(documents)
-    df = document_frequencies(documents)
+    df = document_frequencies(documents, apply_stopwords=apply_stopwords)
     ranked: List[Dict[str, Any]] = []
     for item in items:
         item_id = str(item["id"])
-        lexical = snapshot_idf_lexical_rank(question_text, str(item["content"]), df, n_docs)
+        lexical = snapshot_idf_lexical_rank(
+            question_text,
+            str(item["content"]),
+            df,
+            n_docs,
+            apply_stopwords=apply_stopwords,
+        )
         vector = float(vector_similarity_by_id.get(item_id, 0.0))
         ranked.append(
             {

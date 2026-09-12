@@ -5,8 +5,8 @@ import unittest
 from experiments.text_baseline.constants import TOP_K_EVIDENCE
 from experiments.text_baseline.fixtures import DATA_DIR, load_memory, load_questions
 from experiments.text_baseline.retrieval import (
+    rank_all_hybrid,
     rank_all_lexical,
-    retrieve_for_condition,
     v1_plainto_and_lexical_rank,
 )
 
@@ -27,7 +27,7 @@ class RetrievalV2HistoricalTests(unittest.TestCase):
         self.assertGreater(m05["lexical_rank"], 0.0)
 
     def test_q09_hybrid_recovers_when_vector_alone_ranks_m05_fifth(self) -> None:
-        """Reproduce the observed v1 failure mode: M05 fifth by vector, top-k=4."""
+        """Reproduce the observed v1 failure mode under historical v2 (no stopwords)."""
         items = self.memory["items"]
         vector_scores = {item["id"]: 0.10 for item in items}
         for item_id, score in (
@@ -46,12 +46,12 @@ class RetrievalV2HistoricalTests(unittest.TestCase):
         self.assertEqual([row[1] for row in vector_order[:4]], ["M03", "M07", "P05", "M02"])
         self.assertEqual(vector_order[4][1], "M05")
 
-        hybrid = retrieve_for_condition(
-            "S1",
+        hybrid = rank_all_hybrid(
             self.questions["Q09"]["text"],
-            self.memory,
-            vector_similarity_by_id=vector_scores,
-        )
+            items,
+            vector_scores,
+            apply_stopwords=False,
+        )[:TOP_K_EVIDENCE]
         hybrid_ids = [item["id"] for item in hybrid]
         self.assertIn("M05", hybrid_ids)
         self.assertEqual(len(hybrid_ids), TOP_K_EVIDENCE)
