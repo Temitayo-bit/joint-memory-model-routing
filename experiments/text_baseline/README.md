@@ -39,11 +39,13 @@ PYTHONPATH=. python3 -m experiments.text_baseline run-live \
   --server-version vllm-0.29.0
 ```
 
-Optional Edge Function transport (allow-listed body only; no admin Supabase actions):
+Optional Edge Function transport (allow-listed body only; no admin Supabase actions).
+Send the user JWT only in `Authorization` and the publishable key in `apikey`. Never put the JWT in `apikey`.
 
 ```sh
 export TEXT_BASELINE_EDGE_FUNCTION_URL='https://<project>.functions.supabase.co/text-baseline-pilot'
 export TEXT_BASELINE_USER_JWT='<user-jwt>'
+export TEXT_BASELINE_SUPABASE_PUBLISHABLE_KEY='<supabase-publishable-key>'
 
 PYTHONPATH=. python3 -m experiments.text_baseline run-live \
   --requests /tmp/text-baseline-export/requests.json \
@@ -54,6 +56,7 @@ PYTHONPATH=. python3 -m experiments.text_baseline run-live \
   --hourly-rate 0.50
 ```
 
+`TEXT_BASELINE_USER_JWT` and `TEXT_BASELINE_SUPABASE_PUBLISHABLE_KEY` are ephemeral operator secrets for Edge transport. They must never be committed, logged, screenshotted, or written into response/session artifacts.
 `responses.json` is checkpointed after each request and is accepted by `import-responses`. Re-running the same `--output` resumes and skips completed digests.
 
 ### Embedding bundle (offline; no Supabase writes)

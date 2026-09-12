@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import json
 import math
 import tempfile
@@ -19,6 +20,7 @@ from experiments.text_baseline.live_runner import (
     LARGE_MODEL_ID_ENV,
     SMALL_MODEL_ID_ENV,
     EDGE_URL_ENV,
+    PUBLISHABLE_KEY_ENV,
     USER_JWT_ENV,
     LiveRunnerError,
     call_direct_model,
@@ -378,6 +380,8 @@ class LiveRunnerOfflineTests(unittest.TestCase):
         sample = [row for row in self.requests if row["condition"] == "S0"][0]
         captured = {}
         server_evidence = "a" * 64
+        user_jwt = "user-jwt-secret-value"
+        publishable_key = "sb-publishable-key-value"
 
         def post(url, body, headers, **_kwargs):
             captured["url"] = url
@@ -406,7 +410,8 @@ class LiveRunnerOfflineTests(unittest.TestCase):
             out = Path(tmp) / "edge"
             env = {
                 EDGE_URL_ENV: "https://example.functions.supabase.co/text-baseline-pilot",
-                USER_JWT_ENV: "user-jwt-secret",
+                USER_JWT_ENV: user_jwt,
+                PUBLISHABLE_KEY_ENV: publishable_key,
             }
             with mock.patch.dict("os.environ", env, clear=False):
                 result = run_live(
@@ -421,6 +426,10 @@ class LiveRunnerOfflineTests(unittest.TestCase):
             self.assertEqual(captured["body"]["request_id"], stable_edge_request_id(sample["request_sha256"]))
             self.assertNotIn("messages", captured["body"])
             self.assertNotIn("model", captured["body"])
+            self.assertEqual(captured["headers"]["Authorization"], "Bearer %s" % user_jwt)
+            self.assertEqual(captured["headers"]["apikey"], publishable_key)
+            self.assertNotEqual(captured["headers"]["apikey"], user_jwt)
+            self.assertNotIn(user_jwt, captured["headers"]["apikey"])
             response = result["responses"][0]
             self.assertEqual(response["status"], "success")
             self.assertEqual(response["evidence_source"], "edge")
@@ -428,11 +437,88 @@ class LiveRunnerOfflineTests(unittest.TestCase):
             self.assertEqual(response["exported_evidence_sha256"], sample["evidence_sha256"])
             self.assertEqual(response["latency_ms"]["model_http"], 11.0)
             self.assertAlmostEqual(response["costs"]["allocated_processing_cost"], 11.0 / 3_600_000 * 0.5)
-            self.assertNotIn("user-jwt-secret", (out / "responses.json").read_text(encoding="utf-8"))
+            responses_text = (out / "responses.json").read_text(encoding="utf-8")
+            session_text = (out / "session.json").read_text(encoding="utf-8")
+            self.assertNotIn(user_jwt, responses_text)
+            self.assertNotIn(publishable_key, responses_text)
+            self.assertNotIn(user_jwt, session_text)
+            self.assertNotIn(publishable_key, session_text)
             imported = import_responses(self.bundle, {"responses": result["responses"]})
             matched = [row for row in imported["records"] if row["request_sha256"] == sample["request_sha256"]][0]
             self.assertEqual(matched["evidence_sha256"], server_evidence)
             self.assertEqual(matched["evidence_source"], "edge")
+
+    def test_edge_transport_requires_publishable_key(self) -> None:
+        sample = [row for row in self.requests if row["condition"] == "S0"][0]
+
+        def post(*_args, **_kwargs):
+            raise AssertionError("edge post should not run without publishable key")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "edge-missing-key"
+            env = {
+                EDGE_URL_ENV: "https://example.functions.supabase.co/text-baseline-pilot",
+                USER_JWT_ENV: "user-jwt-secret-value",
+            }
+            with mock.patch.dict("os.environ", env, clear=False):
+                os.environ.pop(PUBLISHABLE_KEY_ENV, None)
+                with self.assertRaises(LiveRunnerError) as raised:
+                    run_live(
+                        [sample],
+                        out,
+                        transport="edge",
+                        snapshot_id="11111111-1111-1111-1111-111111111111",
+                        post=post,
+                    )
+            self.assertIn(PUBLISHABLE_KEY_ENV, str(raised.exception))
+
+    def test_direct_transport_unaffected_by_edge_auth_env(self) -> None:
+        sample = [row for row in self.requests if row["condition"] == "S0"][0]
+        captured = {}
+
+        def post(url, body, headers, **_kwargs):
+            captured["url"] = url
+            captured["headers"] = headers
+            return (
+                200,
+                {
+                    "choices": [{"message": {"content": "direct-answer"}}],
+                    "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+                },
+                5.0,
+                b"{}",
+            )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "direct"
+            env = {
+                MODEL_BASE_URL_ENV: "https://model.example.invalid",
+                MODEL_BEARER_ENV: "direct-bearer-token",
+                SMALL_MODEL_ID_ENV: "small-model",
+                LARGE_MODEL_ID_ENV: "large-model",
+                # Edge secrets may exist in the shell but must not change direct headers.
+                EDGE_URL_ENV: "https://example.functions.supabase.co/text-baseline-pilot",
+                USER_JWT_ENV: "user-jwt-should-not-be-used",
+                PUBLISHABLE_KEY_ENV: "publishable-key-should-not-be-used",
+            }
+            with mock.patch.dict("os.environ", env, clear=False):
+                result = run_live(
+                    [sample],
+                    out,
+                    transport="direct",
+                    hourly_rate_usd=0.5,
+                    post=post,
+                )
+            self.assertEqual(captured["headers"], {"authorization": "Bearer direct-bearer-token"})
+            self.assertNotIn("apikey", captured["headers"])
+            self.assertNotIn("user-jwt-should-not-be-used", captured["headers"].values())
+            self.assertNotIn("publishable-key-should-not-be-used", captured["headers"].values())
+            responses_text = (out / "responses.json").read_text(encoding="utf-8")
+            self.assertNotIn("direct-bearer-token", responses_text)
+            self.assertNotIn("user-jwt-should-not-be-used", responses_text)
+            self.assertNotIn("publishable-key-should-not-be-used", responses_text)
+            self.assertEqual(result["responses"][0]["status"], "success")
+            self.assertEqual(result["responses"][0]["evidence_source"], "exported")
 
     def test_embedding_bundle_offline(self) -> None:
         bundle = build_embedding_bundle(DATA_DIR, encode_fn=_fake_encoder)

@@ -24,6 +24,7 @@ SMALL_MODEL_ID_ENV = "TEXT_BASELINE_SMALL_MODEL_ID"
 LARGE_MODEL_ID_ENV = "TEXT_BASELINE_LARGE_MODEL_ID"
 EDGE_URL_ENV = "TEXT_BASELINE_EDGE_FUNCTION_URL"
 USER_JWT_ENV = "TEXT_BASELINE_USER_JWT"
+PUBLISHABLE_KEY_ENV = "TEXT_BASELINE_SUPABASE_PUBLISHABLE_KEY"
 
 
 class LiveRunnerError(ValueError):
@@ -416,6 +417,7 @@ def call_edge_function(
     *,
     edge_url: str,
     user_jwt: str,
+    publishable_key: str,
     snapshot_id: str,
     embedding: Optional[Sequence[float]],
     timeout_s: float,
@@ -434,10 +436,10 @@ def call_edge_function(
         )
     except LiveClientError:
         return failed_response(request, failure_code="invalid_edge_payload", evidence_source="edge")
-    secrets = {USER_JWT_ENV: user_jwt}
+    secrets = {USER_JWT_ENV: user_jwt, PUBLISHABLE_KEY_ENV: publishable_key}
     headers = {
-        "authorization": "Bearer %s" % user_jwt,
-        "apikey": user_jwt,
+        "Authorization": "Bearer %s" % user_jwt,
+        "apikey": publishable_key,
     }
     wall_started = time.perf_counter()
     try:
@@ -631,6 +633,7 @@ def run_live(
     bearer = None
     edge_url = None
     user_jwt = None
+    publishable_key = None
     if transport == "direct":
         base_url = require_env(MODEL_BASE_URL_ENV)
         bearer = require_env(MODEL_BEARER_ENV)
@@ -640,7 +643,9 @@ def run_live(
     elif transport == "edge":
         edge_url = require_env(EDGE_URL_ENV)
         user_jwt = require_env(USER_JWT_ENV)
+        publishable_key = require_env(PUBLISHABLE_KEY_ENV)
         secrets[USER_JWT_ENV] = user_jwt
+        secrets[PUBLISHABLE_KEY_ENV] = publishable_key
         if not snapshot_id:
             raise LiveRunnerError("edge transport requires --snapshot-id")
         if any(row.get("condition") in MEMORY_CONDITIONS for row in pending) and embeddings_path is None:
@@ -698,7 +703,12 @@ def run_live(
                 post=post,
             )
         else:
-            assert edge_url is not None and user_jwt is not None and snapshot_id is not None
+            assert (
+                edge_url is not None
+                and user_jwt is not None
+                and publishable_key is not None
+                and snapshot_id is not None
+            )
             embedding = None
             if request["condition"] in MEMORY_CONDITIONS:
                 embedding = embeddings.get(request["question_id"])
@@ -712,6 +722,7 @@ def run_live(
                 request,
                 edge_url=edge_url,
                 user_jwt=user_jwt,
+                publishable_key=publishable_key,
                 snapshot_id=snapshot_id,
                 embedding=embedding,
                 timeout_s=timeout_s,
