@@ -2,13 +2,14 @@
 
 This package runs **fixed** conditions S0, S1, L0, and L1 on twelve synthetic questions. It does not implement a controller and does not claim experimental results.
 
-Local retrieval uses **pilot_hybrid_v2** snapshot-local IDF token overlap for plumbing validation. It is not the measured semantic retrieval system. The live Supabase path uses the same lexical rule plus cosine similarity inside `retrieve_pilot_memory`.
+Local retrieval uses **pilot_hybrid_v2_1** snapshot-local IDF token overlap with the PostgreSQL 17 English Snowball stopword list for plumbing validation. It is not the measured semantic retrieval system. The live Supabase path uses the same lexical rule plus cosine similarity inside `retrieve_pilot_memory`.
 
 ## Retrieval versioning
 
 - **v1** (`plainto_tsquery` AND lexical ranks): historical condition. Keep recorded v1 artifacts; do not alter or delete them.
-- **v2** (`pilot_hybrid_v2`): current retrieval condition. After the v2 SQL migration is applied and the Edge Function is redeployed, **re-run memory-enabled text baselines (S1 and L1) before any voice baselines** that claim the same retrieval setup. S0/L0 need not be re-collected solely for this retrieval change.
-- Manifests and evidence hashes record `retriever`, `limit` (4), `limit_cap` (8), and the IDF formula so runs are reproducible.
+- **v2** (`pilot_hybrid_v2`): historical IDF correction without stopwords. Keep the existing v2 preflight export; do not rewrite it.
+- **v2.1** (`pilot_hybrid_v2_1`): current retrieval condition. After the v2.1 SQL migration is applied and the Edge Function is redeployed, produce **fresh S1/L1 exports and runs** before any voice baselines that claim the same retrieval setup. S0/L0 need not be re-collected solely for this retrieval change.
+- Manifests and evidence hashes record `retriever`, `limit` (4), `limit_cap` (8), the IDF formula, and stopword identity/source/count so runs are reproducible.
 
 ## Modes
 
