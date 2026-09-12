@@ -195,7 +195,15 @@ def import_responses(
             records.append(record)
             continue
         raw = indexed[digest]
-        if raw.get("evidence_sha256") != request["evidence_sha256"]:
+        evidence_source = raw.get("evidence_source") or "exported"
+        if evidence_source == "edge":
+            exported = raw.get("exported_evidence_sha256")
+            if exported != request["evidence_sha256"]:
+                raise ImportError_("tampered exported evidence hash for %s" % digest)
+            server_evidence = raw.get("evidence_sha256")
+            if not isinstance(server_evidence, str) or not server_evidence:
+                raise ImportError_("edge responses require server evidence_sha256 for %s" % digest)
+        elif raw.get("evidence_sha256") != request["evidence_sha256"]:
             raise ImportError_("tampered evidence hash for %s" % digest)
         if raw.get("condition") != request["condition"] or raw.get("question_id") != request["question_id"]:
             raise ImportError_("tampered identity for %s" % digest)
@@ -241,8 +249,11 @@ def import_responses(
             "status": status,
             "answer_text": answer_text,
             "failure_code": failure_code,
-            "evidence_sha256": request["evidence_sha256"],
+            "evidence_sha256": raw.get("evidence_sha256"),
+            "evidence_source": evidence_source,
         }
+        if evidence_source == "edge":
+            record["exported_evidence_sha256"] = raw.get("exported_evidence_sha256")
         record.update(measurements)
         records.append(record)
     if session_processing_total is not None:

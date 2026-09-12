@@ -66,6 +66,23 @@ def allocated_processing_cost(
     return format(total / count, "f")
 
 
+def active_inference_processing_cost(
+    model_http_ms: Any,
+    hourly_rate_usd: Any,
+) -> Optional[str]:
+    """GPU processing cost for one answer from measured model HTTP duration.
+
+    Equals (model_http_ms / 3_600_000) * hourly_rate_usd.
+    Never copies session rental/service spending into this field.
+    """
+    if model_http_ms is None or hourly_rate_usd is None:
+        return None
+    duration_ms = _as_non_negative_number(model_http_ms, "model_http_ms")
+    rate = _as_non_negative_number(hourly_rate_usd, "hourly_rate_usd")
+    cost = (duration_ms / Decimal("3600000")) * rate
+    return format(cost, "f")
+
+
 def empty_cost_fields() -> Mapping[str, None]:
     return {
         "market_generation_estimate": None,

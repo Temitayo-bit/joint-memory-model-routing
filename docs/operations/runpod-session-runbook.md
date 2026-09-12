@@ -7,12 +7,91 @@
 3. Confirm the repository is pushed and that required durable memory is in Supabase or another approved store.
 4. Do not place secrets in commits, logs, screenshots, or shared experiment artifacts.
 5. If using a Network Volume, create or attach it in the same RunPod region as the Pod. It may contain only non-sensitive model weights, container caches, and setup material. Recheck its displayed monthly price before creating it.
+6. Print the pinned launch command locally (do not execute this generator against RunPod):
+
+```sh
+PYTHONPATH=. python3 -m experiments.text_baseline print-runpod-launch --model small
+PYTHONPATH=. python3 -m experiments.text_baseline print-runpod-launch --model large
+```
+
+Use the digest-pinned image from the printed JSON (`vllm/vllm-openai@sha256:c2914767605584b6d8f45686b82de173ecc99e781897aa3d0a66dacd72c51ae1`, tag alias `v0.29.0`). Small model `Qwen/Qwen3-4B-AWQ` at revision `74d4bd2bd4bff9cafc9345221320bffb08b406a3`. Large model `Qwen/Qwen3-14B-AWQ` at revision `31c69efc29464b6bb0aee1398b5a7b50a99340c3`. The start command must include `--generation-config vllm`. Clients must send the fixed generation body (`stream false`, `max_tokens 256`, `temperature 0.7`, `top_p 0.8`, `top_k 20`, `min_p 0`, `seed 42`, thinking disabled).
 
 ## During the session
 
-1. Use a self-hosted model server and record the exact image, model revision, quantization, configuration, and start/end time needed to reproduce the run.
-2. Save aggregate, non-sensitive outputs and configuration to the repository or approved durable storage.
-3. Keep the pod private; do not expose an unauthenticated model endpoint to the public internet.
+1. Use a self-hosted model server and record the exact image digest, model revision, quantization, configuration, and start/end time needed to reproduce the run.
+2. Export requests, then run small and large conditions in separate live sessions so each session records one pinned revision:
+
+```sh
+PYTHONPATH=. python3 -m experiments.text_baseline export-requests --output /tmp/text-baseline-export --seed 0 --repeats 1
+
+# Direct-run secret exception: TEXT_BASELINE_MODEL_BASE_URL and TEXT_BASELINE_MODEL_BEARER
+# may exist only as ephemeral local operator environment variables for --transport direct.
+# They must never be committed, logged, screenshotted, or written into artifacts.
+# Production Edge Function secrets remain the durable home for the proxy URL and bearer.
+export TEXT_BASELINE_MODEL_BASE_URL='https://<pod-proxy-host>'
+export TEXT_BASELINE_MODEL_BEARER='<inference-bearer>'
+export TEXT_BASELINE_SMALL_MODEL_ID='Qwen/Qwen3-4B-AWQ'
+export TEXT_BASELINE_LARGE_MODEL_ID='Qwen/Qwen3-14B-AWQ'
+
+# Small conditions only
+PYTHONPATH=. python3 -m experiments.text_baseline run-live \
+  --requests /tmp/text-baseline-export/requests.json \
+  --output /tmp/text-baseline-live-small \
+  --transport direct \
+  --condition S0 --condition S1 \
+  --hourly-rate <console-usd-per-hour> \
+  --gpu-type '<gpu name>' \
+  --session-id <session-id-small> \
+  --pod-id <pod-id> \
+  --small-model-revision 74d4bd2bd4bff9cafc9345221320bffb08b406a3 \
+  --quantization awq \
+  --server-version vllm-0.29.0
+
+# Large conditions only (separate pod/session recommended)
+PYTHONPATH=. python3 -m experiments.text_baseline run-live \
+  --requests /tmp/text-baseline-export/requests.json \
+  --output /tmp/text-baseline-live-large \
+  --transport direct \
+  --condition L0 --condition L1 \
+  --hourly-rate <console-usd-per-hour> \
+  --gpu-type '<gpu name>' \
+  --session-id <session-id-large> \
+  --pod-id <pod-id> \
+  --large-model-revision 31c69efc29464b6bb0aee1398b5a7b50a99340c3 \
+  --quantization awq \
+  --server-version vllm-0.29.0
+
+PYTHONPATH=. python3 -m experiments.text_baseline import-responses \
+  --requests /tmp/text-baseline-export/requests.json \
+  --responses /tmp/text-baseline-live-small/responses.json \
+  --output /tmp/text-baseline-import-small
+```
+
+3. Prepare snapshot embeddings offline before any Edge Function memory run and before Codex loads them into Supabase:
+
+```sh
+PYTHONPATH=. python3 -m experiments.text_baseline prepare-embeddings \
+  --output /tmp/embeddings-bundle.json \
+  --model-revision 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+```
+
+4. Optional Edge Function path after Supabase deploy (user JWT only; no service-role or admin actions from this CLI):
+
+```sh
+export TEXT_BASELINE_EDGE_FUNCTION_URL='https://<project>.functions.supabase.co/text-baseline-pilot'
+export TEXT_BASELINE_USER_JWT='<user-jwt>'
+PYTHONPATH=. python3 -m experiments.text_baseline run-live \
+  --requests /tmp/text-baseline-export/requests.json \
+  --output /tmp/text-baseline-edge \
+  --transport edge \
+  --snapshot-id <snapshot-uuid> \
+  --embeddings /tmp/embeddings-bundle.json \
+  --hourly-rate <console-usd-per-hour>
+```
+
+5. Save aggregate, non-sensitive outputs and configuration to the repository or approved durable storage.
+6. Keep the pod private; do not expose an unauthenticated model endpoint to the public internet.
+7. Record actual rental/service spending in `session.json` → `session_actuals` and in `gpu-session-log.md`. Do not copy that total into per-answer `allocated_processing_cost` or token-price fields.
 
 ## Required shutdown
 

@@ -6,9 +6,9 @@ This project investigates a controller that jointly decides when to retrieve lon
 
 ## Current status
 
-Text-baseline harness is in tree for fixed conditions S0, S1, L0, and L1. Mock and export modes are local-only. A supervised one-request live path is prepared in SQL and an Edge Function and is **not** deployed. No experimental result should be inferred from mock, fixture, or unmeasured output.
+Text-baseline harness is in tree for fixed conditions S0, S1, L0, and L1. Local modes cover mock, export, import, resumable live execution against an OpenAI-compatible endpoint, offline MiniLM embedding bundles, and a non-executing RunPod/vLLM launch-command generator. A supervised one-request live path is prepared in SQL and an Edge Function and is **not** deployed by this repository tooling. No experimental result should be inferred from mock, fixture, or unmeasured output.
 
-See [the text-baseline design](docs/specs/2026-09-11-text-baseline-harness-design.md) and [the harness README](experiments/text_baseline/README.md).
+See [the text-baseline design](docs/specs/2026-09-11-text-baseline-harness-design.md), [the harness README](experiments/text_baseline/README.md), and [the GPU runbook](docs/operations/runpod-session-runbook.md).
 
 ## Development and quality gates
 
