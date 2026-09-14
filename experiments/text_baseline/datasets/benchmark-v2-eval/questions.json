@@ -1,0 +1,244 @@
+{
+  "questions": [
+    {
+      "id": "EVA01",
+      "stratum": "A",
+      "text": "What is 9 times 8?"
+    },
+    {
+      "id": "EVA02",
+      "stratum": "A",
+      "text": "What is the capital city of France?"
+    },
+    {
+      "id": "EVA03",
+      "stratum": "A",
+      "text": "How many minutes are in two and a half hours?"
+    },
+    {
+      "id": "EVA04",
+      "stratum": "A",
+      "text": "What is the chemical formula for carbon dioxide?"
+    },
+    {
+      "id": "EVA05",
+      "stratum": "A",
+      "text": "What is 100 minus 37?"
+    },
+    {
+      "id": "EVA06",
+      "stratum": "A",
+      "text": "Which ocean is the largest by surface area?"
+    },
+    {
+      "id": "EVA07",
+      "stratum": "A",
+      "text": "How many sides does a hexagon have?"
+    },
+    {
+      "id": "EVA08",
+      "stratum": "A",
+      "text": "What is the boiling point of water at standard pressure in Celsius?"
+    },
+    {
+      "id": "EVA09",
+      "stratum": "A",
+      "text": "What is 12 divided by 3?"
+    },
+    {
+      "id": "EVA10",
+      "stratum": "A",
+      "text": "Which planet is closest to the Sun?"
+    },
+    {
+      "id": "EVA11",
+      "stratum": "A",
+      "text": "How many hours are in three days?"
+    },
+    {
+      "id": "EVA12",
+      "stratum": "A",
+      "text": "What is the Roman numeral for 10?"
+    },
+    {
+      "id": "EVB01",
+      "stratum": "B",
+      "text": "A lab needs 50 sample vials. Boxes hold 8 vials and cost 5 dollars; sleeves hold 3 vials and cost 2 dollars. Buy any mix. What is the minimum cost in dollars to obtain at least 50 vials?"
+    },
+    {
+      "id": "EVB02",
+      "stratum": "B",
+      "text": "Three buses seat 12, 15, and 9 passengers. Assign 30 people with no bus overfilled and every bus used. Give one valid seating counts for the three buses in that order."
+    },
+    {
+      "id": "EVB03",
+      "stratum": "B",
+      "text": "A task starts at 13:20, takes 70 minutes, then requires a 25-minute review. At what clock time does the review finish?"
+    },
+    {
+      "id": "EVB04",
+      "stratum": "B",
+      "text": "Printers A, B, and C finish a batch in 6, 4, and 12 minutes respectively when used alone. If A and B run in parallel on equal halves of one batch, how many minutes until the whole batch is done? Assume perfect split and ignore overhead."
+    },
+    {
+      "id": "EVB05",
+      "stratum": "B",
+      "text": "You may spend at most 40 dollars. Item X costs 9 and needs 2 slots; item Y costs 7 and needs 1 slot; you have 5 slots. Maximize the number of items without exceeding budget or slots. What is that maximum item count?"
+    },
+    {
+      "id": "EVB06",
+      "stratum": "B",
+      "text": "A sequence starts at 5. Each step multiplies by 2 then subtracts 1. What is the value after three steps?"
+    },
+    {
+      "id": "EVB07",
+      "stratum": "B",
+      "text": "Shipments of size 7, 5, and 9 must be packed into crates of capacity 12. What is the fewest crates needed if items cannot be split?"
+    },
+    {
+      "id": "EVB08",
+      "stratum": "B",
+      "text": "A meter reads 0.4 at start and rises by 0.15 every 10 minutes. After 40 minutes, what does it read?"
+    },
+    {
+      "id": "EVB09",
+      "stratum": "B",
+      "text": "Workers can process 4 tickets per hour. With 3 workers for 2 hours, then 1 worker for 3 more hours, how many tickets are processed in total?"
+    },
+    {
+      "id": "EVB10",
+      "stratum": "B",
+      "text": "A password policy requires length at least 8, at least one digit, and no spaces. Which of these is valid: 'northriver', 'nr4gate!!', or 'ok 12ab'?"
+    },
+    {
+      "id": "EVB11",
+      "stratum": "B",
+      "text": "Route distances: A→B 4 km, B→C 7 km, A→C 12 km direct. Is the path A→B→C shorter than A→C, and by how many kilometers?"
+    },
+    {
+      "id": "EVB12",
+      "stratum": "B",
+      "text": "Budget 60. Buy as many 7-dollar toolkits as possible while leaving at least 10 dollars unused for shipping. How many toolkits, and how much remains?"
+    },
+    {
+      "id": "EVC01",
+      "stratum": "C",
+      "text": "What tea does the Northriver Lab staff kettle use?"
+    },
+    {
+      "id": "EVC02",
+      "stratum": "C",
+      "text": "When and where is the Northriver weekly design review?"
+    },
+    {
+      "id": "EVC03",
+      "stratum": "C",
+      "text": "What is the synthetic eval project code name at Northriver?"
+    },
+    {
+      "id": "EVC04",
+      "stratum": "C",
+      "text": "What is the Northriver cold-storage freeze-pack shelf label?"
+    },
+    {
+      "id": "EVC05",
+      "stratum": "C",
+      "text": "Where does the Northriver loaner headset cart live?"
+    },
+    {
+      "id": "EVC06",
+      "stratum": "C",
+      "text": "What is the Northriver dry-lab annex door PIN?"
+    },
+    {
+      "id": "EVC07",
+      "stratum": "C",
+      "text": "What vendor code goes on Northriver supply purchase forms?"
+    },
+    {
+      "id": "EVC08",
+      "stratum": "C",
+      "text": "Under what path are Northriver benchmark audio fixtures stored?"
+    },
+    {
+      "id": "EVC09",
+      "stratum": "C",
+      "text": "What whiteboard marker brand is the Northriver standard?"
+    },
+    {
+      "id": "EVC10",
+      "stratum": "C",
+      "text": "What is the overnight temperature logger ID for Northriver bay 2?"
+    },
+    {
+      "id": "EVC11",
+      "stratum": "C",
+      "text": "What is the active Northriver shared printer queue name?"
+    },
+    {
+      "id": "EVC12",
+      "stratum": "C",
+      "text": "Where is the Northriver first-aid cabinet located?"
+    },
+    {
+      "id": "EVD01",
+      "stratum": "D",
+      "text": "Under the current Northriver policy after mid-June 2026, what is the maximum standby GPU session length in minutes?"
+    },
+    {
+      "id": "EVD02",
+      "stratum": "D",
+      "text": "What clock time does the current Harbor Lantern nightly backup window start after the August 2026 update?"
+    },
+    {
+      "id": "EVD03",
+      "stratum": "D",
+      "text": "Which shipping dock should Northriver operators use currently?"
+    },
+    {
+      "id": "EVD04",
+      "stratum": "D",
+      "text": "What is the current Northriver evacuation muster point?"
+    },
+    {
+      "id": "EVD05",
+      "stratum": "D",
+      "text": "Using Northriver May and June synthetic-run token budgets only, what is their combined total in US dollars?"
+    },
+    {
+      "id": "EVD06",
+      "stratum": "D",
+      "text": "For a Harbor Lantern rehearsal that co-reserves the required rooms, which cart key must also be booked?"
+    },
+    {
+      "id": "EVD07",
+      "stratum": "D",
+      "text": "What is the sum of Northriver May, June, and July synthetic-run token budgets in US dollars?"
+    },
+    {
+      "id": "EVD08",
+      "stratum": "D",
+      "text": "Before using calibration wand CW-904 on a Harbor Lantern dry run, which temperature logger must report 18–22 C?"
+    },
+    {
+      "id": "EVD09",
+      "stratum": "D",
+      "text": "Is chamomile citrus the Northriver staff kettle tea? Answer using current handbook facts."
+    },
+    {
+      "id": "EVD10",
+      "stratum": "D",
+      "text": "Does the Northriver handbook record a satellite uplink schedule? If not, say it is unsupported."
+    },
+    {
+      "id": "EVD11",
+      "stratum": "D",
+      "text": "What preferred pizza topping does the Northriver handbook list for lab nights? If none is recorded, say so."
+    },
+    {
+      "id": "EVD12",
+      "stratum": "D",
+      "text": "After 2026-09-01, how must operators enter the dry-lab annex door PIN according to the handbook?"
+    }
+  ]
+}

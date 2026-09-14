@@ -1,0 +1,1016 @@
+{
+  "not_for_prompts": true,
+  "anchors": {
+    "EVA01": {
+      "expected_conclusion": "72",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "9*8=72",
+        "required_facts": [
+          "72"
+        ],
+        "must_not_assert": [
+          "Northriver budgets"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA01"
+      ]
+    },
+    "EVA02": {
+      "expected_conclusion": "Paris",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Capital of France is Paris",
+        "required_facts": [
+          "Paris"
+        ],
+        "must_not_assert": [
+          "Northriver room codes"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA02"
+      ]
+    },
+    "EVA03": {
+      "expected_conclusion": "150",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "2.5 hours = 150 minutes",
+        "required_facts": [
+          "150"
+        ],
+        "must_not_assert": [
+          "backup window times"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA03"
+      ]
+    },
+    "EVA04": {
+      "expected_conclusion": "CO2",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Carbon dioxide formula CO2",
+        "required_facts": [
+          "CO2"
+        ],
+        "must_not_assert": [
+          "Harbor Lantern"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA04"
+      ]
+    },
+    "EVA05": {
+      "expected_conclusion": "63",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "100-37=63",
+        "required_facts": [
+          "63"
+        ],
+        "must_not_assert": [
+          "token budgets"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA05"
+      ]
+    },
+    "EVA06": {
+      "expected_conclusion": "Pacific Ocean",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Largest ocean is Pacific",
+        "required_facts": [
+          "Pacific Ocean"
+        ],
+        "must_not_assert": [
+          "Dock B"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA06"
+      ]
+    },
+    "EVA07": {
+      "expected_conclusion": "6",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Hexagon has 6 sides",
+        "required_facts": [
+          "6"
+        ],
+        "must_not_assert": [
+          "PIN 4827"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA07"
+      ]
+    },
+    "EVA08": {
+      "expected_conclusion": "100",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Boiling point 100 C at standard pressure",
+        "required_facts": [
+          "100"
+        ],
+        "must_not_assert": [
+          "18–22 C logger band"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA08"
+      ]
+    },
+    "EVA09": {
+      "expected_conclusion": "4",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "12/3=4",
+        "required_facts": [
+          "4"
+        ],
+        "must_not_assert": [
+          "standby minutes"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA09"
+      ]
+    },
+    "EVA10": {
+      "expected_conclusion": "Mercury",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Closest planet is Mercury",
+        "required_facts": [
+          "Mercury"
+        ],
+        "must_not_assert": [
+          "Courtyard Lamp Post"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA10"
+      ]
+    },
+    "EVA11": {
+      "expected_conclusion": "72",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "3*24=72 hours",
+        "required_facts": [
+          "72"
+        ],
+        "must_not_assert": [
+          "session caps"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA11"
+      ]
+    },
+    "EVA12": {
+      "expected_conclusion": "X",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Roman numeral for 10 is X",
+        "required_facts": [
+          "X"
+        ],
+        "must_not_assert": [
+          "CK-5"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVA12"
+      ]
+    },
+    "EVB01": {
+      "expected_conclusion": "32",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "Minimum cost is 32 (for example four boxes and six sleeves)",
+        "required_facts": [
+          "minimum cost 32"
+        ],
+        "must_not_assert": [
+          "using May/June budgets"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB01"
+      ]
+    },
+    "EVB02": {
+      "expected_conclusion": "Any valid triple summing to 30 within capacities 12/15/9 with all positive, e.g. 12, 9, 9 or 10, 11, 9",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning",
+        "multi-record composition"
+      ],
+      "rubric": {
+        "conclusion": "All buses used, within caps, sum 30",
+        "required_facts": [
+          "sum 30",
+          "all buses used",
+          "within 12/15/9"
+        ],
+        "must_not_assert": [
+          "leaving a bus empty"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB02"
+      ]
+    },
+    "EVB03": {
+      "expected_conclusion": "15:05",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "13:20+70=14:30; +25=15:05",
+        "required_facts": [
+          "15:05"
+        ],
+        "must_not_assert": [
+          "01:15 backup"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB03"
+      ]
+    },
+    "EVB04": {
+      "expected_conclusion": "3",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "Half batch on A takes 3 min; half on B takes 2 min; whole done when slower half finishes: 3",
+        "required_facts": [
+          "3 minutes"
+        ],
+        "must_not_assert": [
+          "120-minute standby"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB04"
+      ]
+    },
+    "EVB05": {
+      "expected_conclusion": "5",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "Five Y items: cost 35, slots 5",
+        "required_facts": [
+          "5 items"
+        ],
+        "must_not_assert": [
+          "token budget totals"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB05"
+      ]
+    },
+    "EVB06": {
+      "expected_conclusion": "33",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "5→9→17→33",
+        "required_facts": [
+          "33"
+        ],
+        "must_not_assert": [
+          "wrong intermediate"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB06"
+      ]
+    },
+    "EVB07": {
+      "expected_conclusion": "2",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "7+5=12 in one crate; 9 alone needs second crate",
+        "required_facts": [
+          "2 crates"
+        ],
+        "must_not_assert": [
+          "3 crates if splitting claimed necessary"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB07"
+      ]
+    },
+    "EVB08": {
+      "expected_conclusion": "1.0",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "0.4 + 4*0.15 = 1.0",
+        "required_facts": [
+          "1.0"
+        ],
+        "must_not_assert": [
+          "temperature 18-22"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB08"
+      ]
+    },
+    "EVB09": {
+      "expected_conclusion": "36",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "3*4*2 + 1*4*3 = 24+12=36",
+        "required_facts": [
+          "36 tickets"
+        ],
+        "must_not_assert": [
+          "July budget 9"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB09"
+      ]
+    },
+    "EVB10": {
+      "expected_conclusion": "nr4gate!!",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Only nr4gate!! meets length, digit, no spaces",
+        "required_facts": [
+          "nr4gate!!"
+        ],
+        "must_not_assert": [
+          "northriver or ok 12ab as valid"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB10"
+      ]
+    },
+    "EVB11": {
+      "expected_conclusion": "Yes, shorter by 1 km",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "A→B→C is 11 vs direct 12",
+        "required_facts": [
+          "shorter by 1"
+        ],
+        "must_not_assert": [
+          "claiming direct is shorter"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB11"
+      ]
+    },
+    "EVB12": {
+      "expected_conclusion": "7 toolkits with 11 dollars remaining",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "7*7=49; remain 11 (>=10). 8*7=56 leaves 4 (<10) invalid",
+        "required_facts": [
+          "7 toolkits",
+          "11 remaining"
+        ],
+        "must_not_assert": [
+          "8 toolkits"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVB12"
+      ]
+    },
+    "EVC01": {
+      "expected_conclusion": "silver needle white tea",
+      "required_evidence_ids": [
+        "EVM01"
+      ],
+      "diagnostic_tags": [
+        "direct extraction",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Staff kettle tea is silver needle white tea",
+        "required_facts": [
+          "silver needle white tea"
+        ],
+        "must_not_assert": [
+          "chamomile citrus as staff tea"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC01",
+        "EVM01"
+      ]
+    },
+    "EVC02": {
+      "expected_conclusion": "Thursday at 14:30 in room D-07",
+      "required_evidence_ids": [
+        "EVM02"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Design review Thursday 14:30 D-07",
+        "required_facts": [
+          "Thursday",
+          "14:30",
+          "D-07"
+        ],
+        "must_not_assert": [
+          "Tuesday standup facts from other datasets"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC02",
+        "EVM02"
+      ]
+    },
+    "EVC03": {
+      "expected_conclusion": "Harbor Lantern",
+      "required_evidence_ids": [
+        "EVM03"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Code name Harbor Lantern",
+        "required_facts": [
+          "Harbor Lantern"
+        ],
+        "must_not_assert": [
+          "Cedar Compass"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC03",
+        "EVM03"
+      ]
+    },
+    "EVC04": {
+      "expected_conclusion": "FS-19",
+      "required_evidence_ids": [
+        "EVM04"
+      ],
+      "diagnostic_tags": [
+        "direct extraction",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Freeze-pack label FS-19",
+        "required_facts": [
+          "FS-19"
+        ],
+        "must_not_assert": [
+          "FS-07 as active label"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC04",
+        "EVM04"
+      ]
+    },
+    "EVC05": {
+      "expected_conclusion": "closet M-03",
+      "required_evidence_ids": [
+        "EVM05"
+      ],
+      "diagnostic_tags": [
+        "direct extraction",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Headset cart in M-03",
+        "required_facts": [
+          "M-03"
+        ],
+        "must_not_assert": [
+          "M-11 as headset closet"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC05",
+        "EVM05"
+      ]
+    },
+    "EVC06": {
+      "expected_conclusion": "4827",
+      "required_evidence_ids": [
+        "EVM06"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Door PIN 4827",
+        "required_facts": [
+          "4827"
+        ],
+        "must_not_assert": [
+          "CAL-4482"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC06",
+        "EVM06"
+      ]
+    },
+    "EVC07": {
+      "expected_conclusion": "NV-331",
+      "required_evidence_ids": [
+        "EVM07"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Vendor code NV-331",
+        "required_facts": [
+          "NV-331"
+        ],
+        "must_not_assert": [
+          "NR-A17"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC07",
+        "EVM07"
+      ]
+    },
+    "EVC08": {
+      "expected_conclusion": "/synth/audio/harbor",
+      "required_evidence_ids": [
+        "EVM08"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Audio path /synth/audio/harbor",
+        "required_facts": [
+          "/synth/audio/harbor"
+        ],
+        "must_not_assert": [
+          "invented alternate paths"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC08",
+        "EVM08"
+      ]
+    },
+    "EVC09": {
+      "expected_conclusion": "Lumora Blue",
+      "required_evidence_ids": [
+        "EVM09"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Marker brand Lumora Blue",
+        "required_facts": [
+          "Lumora Blue"
+        ],
+        "must_not_assert": [
+          "other brands as standard"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC09",
+        "EVM09"
+      ]
+    },
+    "EVC10": {
+      "expected_conclusion": "TL-220",
+      "required_evidence_ids": [
+        "EVM10"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Logger ID TL-220",
+        "required_facts": [
+          "TL-220"
+        ],
+        "must_not_assert": [
+          "CW-904 as logger id"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC10",
+        "EVM10"
+      ]
+    },
+    "EVC11": {
+      "expected_conclusion": "nr-print-west",
+      "required_evidence_ids": [
+        "EVM11"
+      ],
+      "diagnostic_tags": [
+        "direct extraction",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Active queue nr-print-west",
+        "required_facts": [
+          "nr-print-west"
+        ],
+        "must_not_assert": [
+          "nr-print-east as active"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC11",
+        "EVM11"
+      ]
+    },
+    "EVC12": {
+      "expected_conclusion": "wall niche beside Stairwell North",
+      "required_evidence_ids": [
+        "EVM12"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "First-aid beside Stairwell North",
+        "required_facts": [
+          "Stairwell North"
+        ],
+        "must_not_assert": [
+          "Stairwell East as first-aid location"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVC12",
+        "EVM12"
+      ]
+    },
+    "EVD01": {
+      "expected_conclusion": "120 minutes",
+      "required_evidence_ids": [
+        "EVM13"
+      ],
+      "diagnostic_tags": [
+        "temporal update",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Current cap is 120 minutes after 2026-06-15",
+        "required_facts": [
+          "120 minutes"
+        ],
+        "must_not_assert": [
+          "75 minutes as current"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD01",
+        "EVM13"
+      ]
+    },
+    "EVD02": {
+      "expected_conclusion": "01:15",
+      "required_evidence_ids": [
+        "EVM15"
+      ],
+      "diagnostic_tags": [
+        "temporal update",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Current backup start is 01:15",
+        "required_facts": [
+          "01:15"
+        ],
+        "must_not_assert": [
+          "23:45 as current"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD02",
+        "EVM15"
+      ]
+    },
+    "EVD03": {
+      "expected_conclusion": "Dock B",
+      "required_evidence_ids": [
+        "EVM17"
+      ],
+      "diagnostic_tags": [
+        "conflict resolution",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Current dock is Dock B",
+        "required_facts": [
+          "Dock B"
+        ],
+        "must_not_assert": [
+          "Dock A as current"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD03",
+        "EVM17"
+      ]
+    },
+    "EVD04": {
+      "expected_conclusion": "Courtyard Lamp Post 3",
+      "required_evidence_ids": [
+        "EVM19"
+      ],
+      "diagnostic_tags": [
+        "conflict resolution",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Muster at Lamp Post 3",
+        "required_facts": [
+          "Courtyard Lamp Post 3"
+        ],
+        "must_not_assert": [
+          "Lamp Post 1 as current"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD04",
+        "EVM19"
+      ]
+    },
+    "EVD05": {
+      "expected_conclusion": "29",
+      "required_evidence_ids": [
+        "EVM21",
+        "EVM22"
+      ],
+      "diagnostic_tags": [
+        "multi-record composition",
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "12+17=29",
+        "required_facts": [
+          "29"
+        ],
+        "must_not_assert": [
+          "including July without being asked"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD05",
+        "EVM21",
+        "EVM22"
+      ]
+    },
+    "EVD06": {
+      "expected_conclusion": "CK-5",
+      "required_evidence_ids": [
+        "EVM24",
+        "EVM25"
+      ],
+      "diagnostic_tags": [
+        "multi-record composition"
+      ],
+      "rubric": {
+        "conclusion": "Cart key CK-5 required with D-07/M-03 rehearsal",
+        "required_facts": [
+          "CK-5"
+        ],
+        "must_not_assert": [
+          "omitting the key requirement"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD06",
+        "EVM24",
+        "EVM25"
+      ]
+    },
+    "EVD07": {
+      "expected_conclusion": "38",
+      "required_evidence_ids": [
+        "EVP17",
+        "EVM22"
+      ],
+      "diagnostic_tags": [
+        "multi-record composition",
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "12+17+9=38 using the token ledger",
+        "required_facts": [
+          "38"
+        ],
+        "must_not_assert": [
+          "29 as the three-month sum"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD07",
+        "EVP17",
+        "EVM22"
+      ]
+    },
+    "EVD08": {
+      "expected_conclusion": "TL-220",
+      "required_evidence_ids": [
+        "EVM33",
+        "EVM34"
+      ],
+      "diagnostic_tags": [
+        "multi-record composition"
+      ],
+      "rubric": {
+        "conclusion": "CW-904 gated on TL-220 in range",
+        "required_facts": [
+          "TL-220"
+        ],
+        "must_not_assert": [
+          "using a different logger"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD08",
+        "EVM33",
+        "EVM34"
+      ]
+    },
+    "EVD09": {
+      "expected_conclusion": "No; staff kettle tea is silver needle white tea",
+      "required_evidence_ids": [
+        "EVM01",
+        "EVM26"
+      ],
+      "diagnostic_tags": [
+        "distractor resistance",
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Reject chamomile; affirm silver needle",
+        "required_facts": [
+          "not chamomile",
+          "silver needle white tea"
+        ],
+        "must_not_assert": [
+          "chamomile as staff tea"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD09",
+        "EVM01",
+        "EVM26"
+      ]
+    },
+    "EVD10": {
+      "expected_conclusion": "Unsupported / not recorded",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "unsupported-information abstention"
+      ],
+      "rubric": {
+        "conclusion": "Abstain: no satellite uplink schedule",
+        "required_facts": [
+          "state unsupported or not recorded"
+        ],
+        "must_not_assert": [
+          "inventing an uplink schedule"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD10"
+      ],
+      "allows_empty_evidence": true
+    },
+    "EVD11": {
+      "expected_conclusion": "Not recorded",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "unsupported-information abstention"
+      ],
+      "rubric": {
+        "conclusion": "Abstain: no pizza topping preference recorded",
+        "required_facts": [
+          "state not recorded"
+        ],
+        "must_not_assert": [
+          "inventing a topping"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD11"
+      ],
+      "allows_empty_evidence": true
+    },
+    "EVD12": {
+      "expected_conclusion": "Enter PIN 4827 twice",
+      "required_evidence_ids": [
+        "EVM35"
+      ],
+      "diagnostic_tags": [
+        "temporal update",
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "After 2026-09-01 enter 4827 twice",
+        "required_facts": [
+          "enter twice",
+          "4827"
+        ],
+        "must_not_assert": [
+          "single entry as the post-update rule"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-EVD12",
+        "EVM35"
+      ]
+    }
+  }
+}

@@ -75,12 +75,19 @@ def require_env(name: str) -> str:
     return str(value).strip()
 
 
-def build_chat_payload(model_id: str, messages: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
-    return {
+def build_chat_payload(
+    model_id: str,
+    messages: Sequence[Mapping[str, Any]],
+    generation_seed: Optional[int] = None,
+) -> Dict[str, Any]:
+    payload = {
         "model": model_id,
         "messages": list(messages),
         **FIXED_GENERATION,
     }
+    if generation_seed is not None:
+        payload["seed"] = int(generation_seed)
+    return payload
 
 
 def resolve_model_id(condition: str, small_model_id: str, large_model_id: str) -> str:
@@ -159,6 +166,11 @@ def success_response(
             "actual_rental_and_service_spend": None,
         },
     }
+    if "generation_seed" in request:
+        row["generation_seed"] = request["generation_seed"]
+    for key in ("dataset_id", "dataset_version", "dataset_split", "schedule_seed"):
+        if key in request:
+            row[key] = request[key]
     if evidence_source == "edge":
         row["exported_evidence_sha256"] = request["evidence_sha256"]
     return row
@@ -198,6 +210,11 @@ def failed_response(
             "actual_rental_and_service_spend": None,
         },
     }
+    if "generation_seed" in request:
+        row["generation_seed"] = request["generation_seed"]
+    for key in ("dataset_id", "dataset_version", "dataset_split", "schedule_seed"):
+        if key in request:
+            row[key] = request[key]
     if evidence_source == "edge":
         row["exported_evidence_sha256"] = request["evidence_sha256"]
     return row
@@ -349,7 +366,11 @@ def call_direct_model(
     post: PostFn = post_json,
 ) -> Dict[str, Any]:
     url = base_url.rstrip("/") + "/v1/chat/completions"
-    payload = build_chat_payload(model_id, request["messages"])
+    payload = build_chat_payload(
+        model_id,
+        request["messages"],
+        generation_seed=request.get("generation_seed"),
+    )
     secrets = {MODEL_BEARER_ENV: bearer}
     headers = {"authorization": "Bearer %s" % bearer}
     wall_started = time.perf_counter()
@@ -433,6 +454,7 @@ def call_edge_function(
             request["question_text"],
             request["condition"],
             embedding=embedding,
+            generation_seed=request.get("generation_seed"),
         )
     except LiveClientError:
         return failed_response(request, failure_code="invalid_edge_payload", evidence_source="edge")

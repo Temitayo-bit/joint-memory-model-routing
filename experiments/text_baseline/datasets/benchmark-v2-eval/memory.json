@@ -1,0 +1,286 @@
+{
+  "snapshot_label": "benchmark-v2-eval",
+  "persona": "Fictional Northriver Lab handbook for synthetic benchmark-v2-eval. Not real people, credentials, or conversations.",
+  "items": [
+    {
+      "id": "EVM01",
+      "kind": "fact",
+      "content": "Northriver Lab staff kettle tea is silver needle white tea."
+    },
+    {
+      "id": "EVM02",
+      "kind": "fact",
+      "content": "The Northriver weekly design review is Thursday at 14:30 in room D-07."
+    },
+    {
+      "id": "EVM03",
+      "kind": "fact",
+      "content": "The synthetic eval project code name is Harbor Lantern."
+    },
+    {
+      "id": "EVM04",
+      "kind": "fact",
+      "content": "Northriver cold-storage shelf label for freeze packs is FS-19."
+    },
+    {
+      "id": "EVM05",
+      "kind": "fact",
+      "content": "The loaner headset cart lives in closet M-03."
+    },
+    {
+      "id": "EVM06",
+      "kind": "fact",
+      "content": "Northriver door PIN for the dry-lab annex is 4827."
+    },
+    {
+      "id": "EVM07",
+      "kind": "fact",
+      "content": "The lab supply vendor code on purchase forms is NV-331."
+    },
+    {
+      "id": "EVM08",
+      "kind": "fact",
+      "content": "Benchmark audio fixtures are stored under path /synth/audio/harbor."
+    },
+    {
+      "id": "EVM09",
+      "kind": "fact",
+      "content": "The Northriver whiteboard marker brand standard is Lumora Blue."
+    },
+    {
+      "id": "EVM10",
+      "kind": "fact",
+      "content": "Overnight temperature logger ID for bay 2 is TL-220."
+    },
+    {
+      "id": "EVM11",
+      "kind": "fact",
+      "content": "The shared printer queue name is nr-print-west."
+    },
+    {
+      "id": "EVM12",
+      "kind": "fact",
+      "content": "Northriver first-aid cabinet location is wall niche beside Stairwell North."
+    },
+    {
+      "id": "EVM13",
+      "kind": "fact",
+      "content": "Effective 2026-06-15, Northriver standby GPU sessions may last at most 120 minutes."
+    },
+    {
+      "id": "EVM14",
+      "kind": "fact",
+      "content": "Before 2026-06-15, Northriver standby GPU sessions were capped at 75 minutes."
+    },
+    {
+      "id": "EVM15",
+      "kind": "fact",
+      "content": "Effective 2026-08-01, the Harbor Lantern nightly backup window starts at 01:15."
+    },
+    {
+      "id": "EVM16",
+      "kind": "fact",
+      "content": "Before 2026-08-01, the Harbor Lantern nightly backup window started at 23:45."
+    },
+    {
+      "id": "EVM17",
+      "kind": "fact",
+      "content": "Current Northriver shipping dock is Dock B. An older flyer naming Dock A is obsolete."
+    },
+    {
+      "id": "EVM18",
+      "kind": "fact",
+      "content": "Obsolete flyer: shipping dock listed as Dock A."
+    },
+    {
+      "id": "EVM19",
+      "kind": "fact",
+      "content": "Current evacuation muster point is Courtyard Lamp Post 3. A superseded note named Courtyard Lamp Post 1."
+    },
+    {
+      "id": "EVM20",
+      "kind": "fact",
+      "content": "Superseded muster note: Courtyard Lamp Post 1."
+    },
+    {
+      "id": "EVM21",
+      "kind": "fact",
+      "content": "Northriver May synthetic-run token budget is 12 US dollars."
+    },
+    {
+      "id": "EVM22",
+      "kind": "fact",
+      "content": "Northriver June synthetic-run token budget is 17 US dollars."
+    },
+    {
+      "id": "EVM23",
+      "kind": "fact",
+      "content": "Northriver July synthetic-run token budget is 9 US dollars."
+    },
+    {
+      "id": "EVM24",
+      "kind": "fact",
+      "content": "Harbor Lantern rehearsal needs rooms D-07 and M-03 reserved together for 90 minutes."
+    },
+    {
+      "id": "EVM25",
+      "kind": "fact",
+      "content": "When D-07 and M-03 are co-reserved, operators must also book cart key CK-5."
+    },
+    {
+      "id": "EVM26",
+      "kind": "fact",
+      "content": "Visitor tea sample is chamomile citrus; it is not the staff kettle tea."
+    },
+    {
+      "id": "EVM27",
+      "kind": "fact",
+      "content": "Closet M-11 stores surplus chairs; it is not the loaner headset cart closet."
+    },
+    {
+      "id": "EVM28",
+      "kind": "fact",
+      "content": "Printer queue nr-print-east is a retired alias; do not use it for new jobs."
+    },
+    {
+      "id": "EVM29",
+      "kind": "fact",
+      "content": "Draft label FS-07 appears on an unused shelf sketch; the active freeze-pack label is FS-19."
+    },
+    {
+      "id": "EVM30",
+      "kind": "fact",
+      "content": "Northriver handbook covers tea, rooms, budgets, and safety labels. No satellite uplink schedule is recorded."
+    },
+    {
+      "id": "EVM31",
+      "kind": "fact",
+      "content": "Northriver handbook does not record a preferred pizza topping for lab nights."
+    },
+    {
+      "id": "EVM32",
+      "kind": "fact",
+      "content": "No Northriver policy lists a personal mobile-phone unlock code for operators."
+    },
+    {
+      "id": "EVM33",
+      "kind": "fact",
+      "content": "Calibration wand serial for Harbor Lantern dry runs is CW-904."
+    },
+    {
+      "id": "EVM34",
+      "kind": "fact",
+      "content": "CW-904 may be used only after TL-220 reports temperature within 18–22 C."
+    },
+    {
+      "id": "EVM35",
+      "kind": "fact",
+      "content": "Effective 2026-09-01, the dry-lab annex door PIN remains 4827 but must be entered twice for double-check."
+    },
+    {
+      "id": "EVM36",
+      "kind": "fact",
+      "content": "Northriver spare headset batteries are charged on cart shelf B; shelf A holds empty cases only."
+    },
+    {
+      "id": "EVP01",
+      "kind": "source_passage",
+      "content": "Beverages: staff kettle uses silver needle white tea. Chamomile citrus stays in the visitor cupboard."
+    },
+    {
+      "id": "EVP02",
+      "kind": "source_passage",
+      "content": "Calendar: design review is Thursday 14:30, room D-07, synthetic agenda only."
+    },
+    {
+      "id": "EVP03",
+      "kind": "source_passage",
+      "content": "Naming sheet: Harbor Lantern is the synthetic eval code name, not a public product."
+    },
+    {
+      "id": "EVP04",
+      "kind": "source_passage",
+      "content": "Cold storage: active freeze-pack shelf label is FS-19. Ignore draft FS-07."
+    },
+    {
+      "id": "EVP05",
+      "kind": "source_passage",
+      "content": "Headset ops: loaner cart in closet M-03. M-11 is chairs only."
+    },
+    {
+      "id": "EVP06",
+      "kind": "source_passage",
+      "content": "Annex access: door PIN 4827. After 2026-09-01, enter the PIN twice."
+    },
+    {
+      "id": "EVP07",
+      "kind": "source_passage",
+      "content": "Purchasing: vendor code NV-331 on all Northriver supply forms."
+    },
+    {
+      "id": "EVP08",
+      "kind": "source_passage",
+      "content": "Fixture paths: synthetic audio under /synth/audio/harbor."
+    },
+    {
+      "id": "EVP09",
+      "kind": "source_passage",
+      "content": "Whiteboard kit: Lumora Blue markers are the standard; other colors are loaner-only."
+    },
+    {
+      "id": "EVP10",
+      "kind": "source_passage",
+      "content": "Bay 2 logger: device TL-220 records overnight temperature."
+    },
+    {
+      "id": "EVP11",
+      "kind": "source_passage",
+      "content": "Print services: active queue nr-print-west. nr-print-east is retired."
+    },
+    {
+      "id": "EVP12",
+      "kind": "source_passage",
+      "content": "Safety: first-aid cabinet is in the wall niche beside Stairwell North."
+    },
+    {
+      "id": "EVP13",
+      "kind": "source_passage",
+      "content": "Compute policy update 2026-06-15: standby GPU sessions max 120 minutes (was 75)."
+    },
+    {
+      "id": "EVP14",
+      "kind": "source_passage",
+      "content": "Backup window update 2026-08-01: Harbor Lantern nightly backup starts 01:15 (was 23:45)."
+    },
+    {
+      "id": "EVP15",
+      "kind": "source_passage",
+      "content": "Shipping: use Dock B. Discard older Dock A flyers."
+    },
+    {
+      "id": "EVP16",
+      "kind": "source_passage",
+      "content": "Muster revision: gather at Courtyard Lamp Post 3. Lamp Post 1 is retired."
+    },
+    {
+      "id": "EVP17",
+      "kind": "source_passage",
+      "content": "Token ledger: May 12 USD, June 17 USD, July 9 USD for synthetic runs."
+    },
+    {
+      "id": "EVP18",
+      "kind": "source_passage",
+      "content": "Rehearsal checklist: co-reserve D-07 and M-03 for 90 minutes and book cart key CK-5."
+    },
+    {
+      "id": "EVP19",
+      "kind": "source_passage",
+      "content": "Calibration gate: wand CW-904 only after TL-220 shows 18–22 C."
+    },
+    {
+      "id": "EVP20",
+      "kind": "source_passage",
+      "content": "Scope note: handbook has no satellite uplink schedule, pizza preference, or personal phone unlock codes."
+    }
+  ]
+}

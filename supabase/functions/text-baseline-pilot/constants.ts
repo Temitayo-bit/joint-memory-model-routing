@@ -33,7 +33,9 @@ export const ALLOWED_BODY_KEYS = new Set([
   "question",
   "condition",
   "embedding",
+  "generation_seed",
 ]);
+export const ALLOWED_GENERATION_SEEDS = new Set<number>([42, 43, 44]);
 export const REJECTED_CLIENT_KEYS = [
   "model_url",
   "base_url",

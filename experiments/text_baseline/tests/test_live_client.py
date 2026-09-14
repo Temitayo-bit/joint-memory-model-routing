@@ -51,6 +51,32 @@ class LiveClientTests(unittest.TestCase):
         with self.assertRaises(LiveClientError):
             validate_embedding([0.0] * 384)
 
+    def test_generation_seed_allow_list(self) -> None:
+        body = build_live_request(
+            str(uuid.uuid4()),
+            str(uuid.uuid4()),
+            "q",
+            "S0",
+            generation_seed=43,
+        )
+        self.assertEqual(body["generation_seed"], 43)
+        with self.assertRaises(LiveClientError):
+            build_live_request(
+                str(uuid.uuid4()),
+                str(uuid.uuid4()),
+                "q",
+                "S0",
+                generation_seed=99,
+            )
+        with self.assertRaises(LiveClientError):
+            build_live_request(
+                str(uuid.uuid4()),
+                str(uuid.uuid4()),
+                "q",
+                "S0",
+                extra={"seed": 42},
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

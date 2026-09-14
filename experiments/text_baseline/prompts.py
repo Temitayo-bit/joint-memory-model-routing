@@ -7,11 +7,16 @@ from typing import Any, Dict, List, Mapping, Sequence
 FORBIDDEN_PROMPT_KEYS = frozenset(
     {
         "expected_answer",
+        "expected_conclusion",
         "anchors",
         "scoring",
         "reference_answer",
         "gold",
         "keywords",
+        "required_evidence_ids",
+        "diagnostic_tags",
+        "rubric",
+        "must_not_appear_in_prompts",
     }
 )
 
@@ -37,6 +42,7 @@ def render_user_message(question_text: str, evidence: Sequence[Mapping[str, Any]
     if evidence:
         lines.append("Memory evidence:")
         for item in evidence:
+            # Evidence identifiers stay out of the prompt; only kind and content are shown.
             lines.append("- [%s] %s" % (item["kind"], item["content"]))
         lines.append("")
     else:
@@ -45,6 +51,17 @@ def render_user_message(question_text: str, evidence: Sequence[Mapping[str, Any]
     lines.append("Question:")
     lines.append(question_text)
     return "\n".join(lines)
+
+
+def prompt_contains_evidence_ids(
+    messages: Sequence[Mapping[str, str]],
+    evidence_ids: Sequence[str],
+) -> bool:
+    blob = "\n".join(message.get("content", "") for message in messages)
+    for item_id in evidence_ids:
+        if item_id and item_id in blob:
+            return True
+    return False
 
 
 def build_messages(

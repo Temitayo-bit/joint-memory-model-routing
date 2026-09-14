@@ -20,6 +20,7 @@ export function buildModelPayload(
   condition: Condition,
   messages: Array<{ role: string; content: string }>,
   config: ServerConfig,
+  generationSeed?: number,
 ): Record<string, unknown> {
   const alias = modelAlias(condition);
   const model = alias === "large" ? config.largeModelId : config.smallModelId;
@@ -27,6 +28,7 @@ export function buildModelPayload(
     model,
     messages,
     ...FIXED_GENERATION,
+    ...(generationSeed === undefined ? {} : { seed: generationSeed }),
   };
 }
 

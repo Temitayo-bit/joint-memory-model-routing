@@ -1,0 +1,17 @@
+{
+  "dataset_id": "benchmark-v2-eval",
+  "version": "1",
+  "split": "eval",
+  "question_count": 48,
+  "stratum_counts": {
+    "A": 12,
+    "B": 12,
+    "C": 12,
+    "D": 12
+  },
+  "allowed_generation_seeds": [
+    42,
+    43,
+    44
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "dataset_id": "benchmark-v2-dev",
+  "version": "1",
+  "split": "dev",
+  "question_count": 16,
+  "stratum_counts": {
+    "A": 4,
+    "B": 4,
+    "C": 4,
+    "D": 4
+  },
+  "allowed_generation_seeds": [
+    42,
+    43,
+    44
+  ]
+}

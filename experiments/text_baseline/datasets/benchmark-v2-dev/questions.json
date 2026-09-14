@@ -1,0 +1,84 @@
+{
+  "questions": [
+    {
+      "id": "DVA01",
+      "stratum": "A",
+      "text": "What is 15 plus 27?"
+    },
+    {
+      "id": "DVA02",
+      "stratum": "A",
+      "text": "What is the chemical symbol for sodium?"
+    },
+    {
+      "id": "DVA03",
+      "stratum": "A",
+      "text": "How many days are in a non-leap year?"
+    },
+    {
+      "id": "DVA04",
+      "stratum": "A",
+      "text": "What is the positive square root of 81?"
+    },
+    {
+      "id": "DVB01",
+      "stratum": "B",
+      "text": "A courier can carry at most 3 packages per trip and must deliver 11 packages. Trips cost 4 dollars each plus a flat 2-dollar start fee for the day. What is the minimum total cost in dollars?"
+    },
+    {
+      "id": "DVB02",
+      "stratum": "B",
+      "text": "Room slots: A holds up to 2 people, B up to 3, C up to 5. Seat exactly 8 people by filling A and B to capacity and placing the remainder in C. How many people are in A, B, and C respectively?"
+    },
+    {
+      "id": "DVB03",
+      "stratum": "B",
+      "text": "A timer starts at 09:40, runs for 95 minutes, then adds a 15-minute buffer. What clock time does the buffered period end?"
+    },
+    {
+      "id": "DVB04",
+      "stratum": "B",
+      "text": "Buy markers in packs of 4 for 3 dollars or packs of 6 for 4 dollars. You need at least 20 markers and may buy any mix of packs. What is the cheapest total cost in dollars?"
+    },
+    {
+      "id": "DVC01",
+      "stratum": "C",
+      "text": "What tea does Northriver Lab prefer for staff?"
+    },
+    {
+      "id": "DVC02",
+      "stratum": "C",
+      "text": "What is the Northriver archive locker code?"
+    },
+    {
+      "id": "DVC03",
+      "stratum": "C",
+      "text": "In which room is the Northriver temporary-visitor badge printer?"
+    },
+    {
+      "id": "DVC04",
+      "stratum": "C",
+      "text": "At what time do weekday quiet hours begin in the Northriver open bay?"
+    },
+    {
+      "id": "DVD01",
+      "stratum": "D",
+      "text": "According to the current Northriver checkout policy after March 2026, how many minutes may equipment leave the bay?"
+    },
+    {
+      "id": "DVD02",
+      "stratum": "D",
+      "text": "Which stairwell is the current primary fire exit for the Northriver evaluation bay?"
+    },
+    {
+      "id": "DVD03",
+      "stratum": "D",
+      "text": "Using only Northriver soft-start allotments, what is the combined March and April GPU allotment in US dollars?"
+    },
+    {
+      "id": "DVD04",
+      "stratum": "D",
+      "text": "Does the Northriver handbook state an overnight visitor parking policy? If not recorded, say so."
+    }
+  ]
+}

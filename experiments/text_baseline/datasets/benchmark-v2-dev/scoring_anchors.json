@@ -1,0 +1,345 @@
+{
+  "not_for_prompts": true,
+  "anchors": {
+    "DVA01": {
+      "expected_conclusion": "42",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "Answer 42",
+        "required_facts": [
+          "15+27=42"
+        ],
+        "must_not_assert": [
+          "Northriver-specific tea or room codes"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVA01"
+      ]
+    },
+    "DVA02": {
+      "expected_conclusion": "Na",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Answer Na",
+        "required_facts": [
+          "sodium symbol is Na"
+        ],
+        "must_not_assert": [
+          "Northriver lab facts"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVA02"
+      ]
+    },
+    "DVA03": {
+      "expected_conclusion": "365",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Answer 365",
+        "required_facts": [
+          "non-leap year has 365 days"
+        ],
+        "must_not_assert": [
+          "lab schedule facts"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVA03"
+      ]
+    },
+    "DVA04": {
+      "expected_conclusion": "9",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "Answer 9",
+        "required_facts": [
+          "sqrt(81)=9"
+        ],
+        "must_not_assert": [
+          "memory ids"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVA04"
+      ]
+    },
+    "DVB01": {
+      "expected_conclusion": "18",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "Four trips needed (ceil(11/3)=4); cost 4*4+2=18",
+        "required_facts": [
+          "4 trips",
+          "18 dollars total"
+        ],
+        "must_not_assert": [
+          "Northriver allotment figures"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVB01"
+      ]
+    },
+    "DVB02": {
+      "expected_conclusion": "2, 3, and 3",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning",
+        "multi-record composition"
+      ],
+      "rubric": {
+        "conclusion": "Fill A=2, B=3, remainder C=3",
+        "required_facts": [
+          "A=2",
+          "B=3",
+          "C=3"
+        ],
+        "must_not_assert": [
+          "overfilling C beyond 5"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVB02"
+      ]
+    },
+    "DVB03": {
+      "expected_conclusion": "11:30",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "09:40 + 95 min = 11:15; +15 buffer = 11:30",
+        "required_facts": [
+          "ends at 11:30"
+        ],
+        "must_not_assert": [
+          "quiet-hours 21:00"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVB03"
+      ]
+    },
+    "DVB04": {
+      "expected_conclusion": "14",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "Two 6-packs and two 4-packs: 12+8=20 markers for 4+4+3+3=14",
+        "required_facts": [
+          "at least 20 markers",
+          "cost 14"
+        ],
+        "must_not_assert": [
+          "GPU allotment totals"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVB04"
+      ]
+    },
+    "DVC01": {
+      "expected_conclusion": "oolong peach blend",
+      "required_evidence_ids": [
+        "DVM01"
+      ],
+      "diagnostic_tags": [
+        "direct extraction",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Staff preferred tea is oolong peach blend",
+        "required_facts": [
+          "oolong peach blend"
+        ],
+        "must_not_assert": [
+          "peppermint as staff preferred tea"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVC01",
+        "DVM01"
+      ]
+    },
+    "DVC02": {
+      "expected_conclusion": "NR-A17",
+      "required_evidence_ids": [
+        "DVM02"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Archive locker code NR-A17",
+        "required_facts": [
+          "NR-A17"
+        ],
+        "must_not_assert": [
+          "CAL-4482 as locker code"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVC02",
+        "DVM02"
+      ]
+    },
+    "DVC03": {
+      "expected_conclusion": "C-04",
+      "required_evidence_ids": [
+        "DVM03"
+      ],
+      "diagnostic_tags": [
+        "direct extraction",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Badge printer in C-04",
+        "required_facts": [
+          "room C-04"
+        ],
+        "must_not_assert": [
+          "C-09 as badge printer room"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVC03",
+        "DVM03"
+      ]
+    },
+    "DVC04": {
+      "expected_conclusion": "21:00",
+      "required_evidence_ids": [
+        "DVM04"
+      ],
+      "diagnostic_tags": [
+        "direct extraction"
+      ],
+      "rubric": {
+        "conclusion": "Quiet hours begin at 21:00 on weekdays",
+        "required_facts": [
+          "21:00"
+        ],
+        "must_not_assert": [
+          "09:40 or 11:30 as quiet hours"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVC04",
+        "DVM04"
+      ]
+    },
+    "DVD01": {
+      "expected_conclusion": "90 minutes",
+      "required_evidence_ids": [
+        "DVM05"
+      ],
+      "diagnostic_tags": [
+        "temporal update",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Current post-2026-03-01 window is 90 minutes",
+        "required_facts": [
+          "90 minutes after 2026-03-01"
+        ],
+        "must_not_assert": [
+          "60 minutes as the current rule"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVD01",
+        "DVM05"
+      ]
+    },
+    "DVD02": {
+      "expected_conclusion": "Stairwell East",
+      "required_evidence_ids": [
+        "DVM07"
+      ],
+      "diagnostic_tags": [
+        "conflict resolution",
+        "distractor resistance"
+      ],
+      "rubric": {
+        "conclusion": "Current primary exit is Stairwell East",
+        "required_facts": [
+          "Stairwell East"
+        ],
+        "must_not_assert": [
+          "Stairwell West as current primary exit"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVD02",
+        "DVM07"
+      ]
+    },
+    "DVD03": {
+      "expected_conclusion": "40",
+      "required_evidence_ids": [
+        "DVM11",
+        "DVM12"
+      ],
+      "diagnostic_tags": [
+        "multi-record composition",
+        "constraint or arithmetic reasoning"
+      ],
+      "rubric": {
+        "conclusion": "18+22=40 US dollars",
+        "required_facts": [
+          "March 18",
+          "April 22",
+          "sum 40"
+        ],
+        "must_not_assert": [
+          "75 as soft-start sum"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVD03",
+        "DVM11",
+        "DVM12"
+      ]
+    },
+    "DVD04": {
+      "expected_conclusion": "Not recorded in the Northriver handbook",
+      "required_evidence_ids": [],
+      "diagnostic_tags": [
+        "unsupported-information abstention"
+      ],
+      "rubric": {
+        "conclusion": "Abstain: overnight visitor parking policy is not recorded",
+        "required_facts": [
+          "state that it is not recorded"
+        ],
+        "must_not_assert": [
+          "inventing a parking rule"
+        ]
+      },
+      "must_not_appear_in_prompts": [
+        "SCORING-ANCHOR-DVD04"
+      ],
+      "allows_empty_evidence": true
+    }
+  }
+}

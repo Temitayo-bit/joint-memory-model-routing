@@ -403,6 +403,50 @@ Deno.test("fixed non-thinking generation settings", () => {
   assertEquals(payload.chat_template_kwargs, { enable_thinking: false });
 });
 
+Deno.test("generation_seed allow-list overrides fixed seed", () => {
+  const body = parsePilotBody({
+    request_id: REQ,
+    snapshot_id: SNAP,
+    question: "q",
+    condition: "S0",
+    generation_seed: 44,
+  });
+  assertEquals(body.generation_seed, 44);
+  const payload = buildModelPayload(
+    "S0",
+    [{ role: "user", content: "q" }],
+    readServerConfig(TEST_ENV),
+    body.generation_seed,
+  );
+  assertEquals(payload.seed, 44);
+  let threw = false;
+  try {
+    parsePilotBody({
+      request_id: REQ,
+      snapshot_id: SNAP,
+      question: "q",
+      condition: "S0",
+      generation_seed: 99,
+    });
+  } catch {
+    threw = true;
+  }
+  assert(threw);
+  threw = false;
+  try {
+    parsePilotBody({
+      request_id: REQ,
+      snapshot_id: SNAP,
+      question: "q",
+      condition: "S0",
+      seed: 43,
+    });
+  } catch {
+    threw = true;
+  }
+  assert(threw);
+});
+
 Deno.test("decodeJwtPayload rejects malformed tokens", () => {
   let threw = false;
   try {

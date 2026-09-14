@@ -10,12 +10,29 @@ QUESTION_CATEGORIES: Tuple[str, ...] = (
     "general_knowledge",
     "memory_and_general",
 )
+BENCHMARK_V2_STRATA: Tuple[str, ...] = ("A", "B", "C", "D")
+BENCHMARK_V2_GENERATION_SEEDS: Tuple[int, ...] = (42, 43, 44)
+BENCHMARK_V2_DIAGNOSTIC_TAGS: FrozenSet[str] = frozenset(
+    {
+        "direct extraction",
+        "multi-record composition",
+        "temporal update",
+        "conflict resolution",
+        "constraint or arithmetic reasoning",
+        "distractor resistance",
+        "unsupported-information abstention",
+    }
+)
+LEGACY_DATASET_ID = "synthetic-northriver-pilot-v1"
+LEGACY_QUESTION_COUNT = 12
+LEGACY_PER_CATEGORY = 4
 MAX_REPEATS = 5
 TOP_K_EVIDENCE = 4
 RETRIEVAL_LIMIT_CAP = 8
 EMBEDDING_DIMS = 384
 NORM_TOLERANCE = 1e-3
 CANONICAL_JSON_SEPARATORS = (",", ":")
+MAX_REQUIRED_EVIDENCE_IDS = 2
 
 # Matches supabase/functions/text-baseline-pilot/constants.ts FIXED_GENERATION.
 FIXED_GENERATION: Dict[str, Any] = {

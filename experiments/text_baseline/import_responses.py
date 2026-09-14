@@ -148,20 +148,45 @@ def import_responses(
         raise ImportError_("manifest.requests_sha256 is required")
     recomputed_digests = []
     schedule_cells = []
+    manifest_dataset_id = manifest.get("dataset_id")
+    manifest_dataset_version = manifest.get("dataset_version")
+    manifest_dataset_split = manifest.get("dataset_split")
+    allowed_seeds = manifest.get("allowed_generation_seeds")
+    if allowed_seeds is not None:
+        if not isinstance(allowed_seeds, list) or not allowed_seeds:
+            raise ImportError_("manifest.allowed_generation_seeds must be a non-empty list")
+        if any(not isinstance(seed, int) or isinstance(seed, bool) for seed in allowed_seeds):
+            raise ImportError_("manifest.allowed_generation_seeds must be integers")
     for row in requests:
         if not isinstance(row, Mapping):
             raise ImportError_("each request must be an object")
         digest = request_digest(row)
         if row.get("request_sha256") != digest:
             raise ImportError_("request digest does not match canonical request fields")
+        if manifest_dataset_id is not None and row.get("dataset_id") != manifest_dataset_id:
+            raise ImportError_("request dataset_id does not match manifest")
+        if (
+            manifest_dataset_version is not None
+            and row.get("dataset_version") != manifest_dataset_version
+        ):
+            raise ImportError_("request dataset_version does not match manifest")
+        if manifest_dataset_split is not None and row.get("dataset_split") != manifest_dataset_split:
+            raise ImportError_("request dataset_split does not match manifest")
+        generation_seed = row.get("generation_seed")
+        if allowed_seeds is not None:
+            if generation_seed not in allowed_seeds:
+                raise ImportError_("request generation_seed is not allow-listed for this dataset")
+        elif generation_seed is not None:
+            raise ImportError_("legacy requests must not carry a generation_seed dimension")
         recomputed_digests.append(digest)
-        schedule_cells.append(
-            {
-                "repeat_index": row["repeat_index"],
-                "question_id": row["question_id"],
-                "condition": row["condition"],
-            }
-        )
+        schedule_cell = {
+            "repeat_index": row["repeat_index"],
+            "question_id": row["question_id"],
+            "condition": row["condition"],
+        }
+        if generation_seed is not None:
+            schedule_cell["generation_seed"] = generation_seed
+        schedule_cells.append(schedule_cell)
     if schedule != schedule_hash(schedule_cells):
         raise ImportError_("tampered schedule order or identity")
     if expected_requests_hash != sha256_json(recomputed_digests):
@@ -190,7 +215,12 @@ def import_responses(
                 "answer_text": None,
                 "failure_code": "missing_response",
                 "evidence_sha256": request["evidence_sha256"],
+                "dataset_id": request.get("dataset_id"),
+                "dataset_version": request.get("dataset_version"),
+                "dataset_split": request.get("dataset_split"),
             }
+            if "generation_seed" in request:
+                record["generation_seed"] = request["generation_seed"]
             record.update(empty_measurements())
             records.append(record)
             continue
@@ -207,6 +237,16 @@ def import_responses(
             raise ImportError_("tampered evidence hash for %s" % digest)
         if raw.get("condition") != request["condition"] or raw.get("question_id") != request["question_id"]:
             raise ImportError_("tampered identity for %s" % digest)
+        if "generation_seed" in request:
+            if raw.get("generation_seed") not in (None, request["generation_seed"]):
+                raise ImportError_("response generation_seed does not match request")
+        if any(key in raw for key in ("dataset_id", "dataset_version", "dataset_split")):
+            if raw.get("dataset_id") not in (None, request.get("dataset_id")):
+                raise ImportError_("response dataset_id does not match request")
+            if raw.get("dataset_version") not in (None, request.get("dataset_version")):
+                raise ImportError_("response dataset_version does not match request")
+            if raw.get("dataset_split") not in (None, request.get("dataset_split")):
+                raise ImportError_("response dataset_split does not match request")
         status = raw.get("status")
         if status not in _ALLOWED_STATUS:
             raise ImportError_("invalid status")
@@ -251,7 +291,12 @@ def import_responses(
             "failure_code": failure_code,
             "evidence_sha256": raw.get("evidence_sha256"),
             "evidence_source": evidence_source,
+            "dataset_id": request.get("dataset_id"),
+            "dataset_version": request.get("dataset_version"),
+            "dataset_split": request.get("dataset_split"),
         }
+        if "generation_seed" in request:
+            record["generation_seed"] = request["generation_seed"]
         if evidence_source == "edge":
             record["exported_evidence_sha256"] = raw.get("exported_evidence_sha256")
         record.update(measurements)
