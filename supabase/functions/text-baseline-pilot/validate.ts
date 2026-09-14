@@ -1,5 +1,6 @@
 import {
   ALLOWED_BODY_KEYS,
+  ALLOWED_GENERATION_SEEDS,
   CONDITIONS,
   EMBEDDING_DIMS,
   MEMORY_CONDITIONS,
@@ -14,6 +15,7 @@ export type PilotBody = {
   question: string;
   condition: Condition;
   embedding?: number[];
+  generation_seed?: number;
 };
 
 export class PilotValidationError extends Error {
@@ -54,6 +56,13 @@ export function validateEmbedding(value: unknown): number[] {
   return floats;
 }
 
+export function validateGenerationSeed(value: unknown): number {
+  if (typeof value !== "number" || !Number.isInteger(value) || !ALLOWED_GENERATION_SEEDS.has(value)) {
+    throw new PilotValidationError("generation_seed must be one of 42, 43, or 44");
+  }
+  return value;
+}
+
 export function parsePilotBody(payload: Record<string, unknown>): PilotBody {
   for (const key of Object.keys(payload)) {
     if (!ALLOWED_BODY_KEYS.has(key) || REJECTED_CLIENT_KEYS.includes(key)) {
@@ -74,6 +83,9 @@ export function parsePilotBody(payload: Record<string, unknown>): PilotBody {
     question: payload.question,
     condition: typed,
   };
+  if (payload.generation_seed !== undefined) {
+    body.generation_seed = validateGenerationSeed(payload.generation_seed);
+  }
   if (MEMORY_CONDITIONS.has(typed)) {
     body.embedding = validateEmbedding(payload.embedding);
   } else if (payload.embedding !== undefined) {

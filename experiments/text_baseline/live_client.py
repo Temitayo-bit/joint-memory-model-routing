@@ -6,9 +6,17 @@ import math
 import uuid
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from experiments.text_baseline.constants import CONDITIONS, EMBEDDING_DIMS, MEMORY_CONDITIONS, NORM_TOLERANCE
+from experiments.text_baseline.constants import (
+    BENCHMARK_V2_GENERATION_SEEDS,
+    CONDITIONS,
+    EMBEDDING_DIMS,
+    MEMORY_CONDITIONS,
+    NORM_TOLERANCE,
+)
 
-ALLOWED_BODY_KEYS = frozenset({"request_id", "snapshot_id", "question", "condition", "embedding"})
+ALLOWED_BODY_KEYS = frozenset(
+    {"request_id", "snapshot_id", "question", "condition", "embedding", "generation_seed"}
+)
 REJECTED_CLIENT_KEYS = frozenset(
     {
         "model_url",
@@ -32,6 +40,7 @@ REJECTED_CLIENT_KEYS = frozenset(
         "quantization",
     }
 )
+ALLOWED_GENERATION_SEEDS = frozenset(BENCHMARK_V2_GENERATION_SEEDS)
 
 
 class LiveClientError(ValueError):
@@ -63,6 +72,14 @@ def validate_embedding(values: Sequence[Any]) -> List[float]:
     return floats
 
 
+def validate_generation_seed(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise LiveClientError("generation_seed must be an allow-listed integer")
+    if value not in ALLOWED_GENERATION_SEEDS:
+        raise LiveClientError("generation_seed must be one of %s" % sorted(ALLOWED_GENERATION_SEEDS))
+    return value
+
+
 def build_live_request(
     request_id: str,
     snapshot_id: str,
@@ -70,6 +87,7 @@ def build_live_request(
     condition: str,
     embedding: Optional[Sequence[Any]] = None,
     extra: Optional[Mapping[str, Any]] = None,
+    generation_seed: Optional[int] = None,
 ) -> Dict[str, Any]:
     if extra:
         banned = REJECTED_CLIENT_KEYS.intersection(extra.keys()) | (
@@ -77,6 +95,10 @@ def build_live_request(
         )
         if banned:
             raise LiveClientError("client must not send %s" % sorted(banned))
+        if "generation_seed" in extra:
+            if generation_seed is not None and extra["generation_seed"] != generation_seed:
+                raise LiveClientError("conflicting generation_seed values")
+            generation_seed = validate_generation_seed(extra["generation_seed"])
     if not _is_uuid(request_id) or not _is_uuid(snapshot_id):
         raise LiveClientError("request_id and snapshot_id must be UUIDs")
     if not question or not isinstance(question, str) or not question.strip():
@@ -89,6 +111,8 @@ def build_live_request(
         "question": question.strip(),
         "condition": condition,
     }
+    if generation_seed is not None:
+        body["generation_seed"] = validate_generation_seed(generation_seed)
     if condition in MEMORY_CONDITIONS:
         if embedding is None:
             raise LiveClientError("memory conditions require a 384-d unit embedding")

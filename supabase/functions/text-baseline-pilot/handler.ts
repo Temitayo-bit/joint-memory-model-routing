@@ -154,7 +154,12 @@ export async function handlePilotRequest(req: Request, deps: PilotDeps): Promise
     }
     const evidenceSha = await sha256Hex(evidenceCanonical(evidence), deps.digest);
     const messages = buildMessages(body.question, evidence);
-    const modelPayload = buildModelPayload(body.condition, messages, config);
+    const modelPayload = buildModelPayload(
+      body.condition,
+      messages,
+      config,
+      body.generation_seed,
+    );
     const claimed = await deps.db.claimCall(body.request_id);
     if (!claimed) {
       throw new PilotValidationError("call rate exceeded", 429);

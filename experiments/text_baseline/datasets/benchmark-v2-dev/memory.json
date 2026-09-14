@@ -1,0 +1,116 @@
+{
+  "snapshot_label": "benchmark-v2-dev",
+  "persona": "Fictional Northriver Lab handbook for synthetic benchmark-v2-dev. Not real people, credentials, or conversations.",
+  "items": [
+    {
+      "id": "DVM01",
+      "kind": "fact",
+      "content": "Northriver Lab preferred staff tea is oolong peach blend."
+    },
+    {
+      "id": "DVM02",
+      "kind": "fact",
+      "content": "The Northriver archive locker code is NR-A17."
+    },
+    {
+      "id": "DVM03",
+      "kind": "fact",
+      "content": "The badge printer for temporary visitors is in room C-04."
+    },
+    {
+      "id": "DVM04",
+      "kind": "fact",
+      "content": "Weekday quiet hours in the Northriver open bay begin at 21:00."
+    },
+    {
+      "id": "DVM05",
+      "kind": "fact",
+      "content": "Effective 2026-03-01, the equipment checkout window is 90 minutes. This supersedes the prior 60-minute window."
+    },
+    {
+      "id": "DVM06",
+      "kind": "fact",
+      "content": "Before 2026-03-01, the Northriver equipment checkout window was 60 minutes."
+    },
+    {
+      "id": "DVM07",
+      "kind": "fact",
+      "content": "The primary fire exit for the Northriver evaluation bay is Stairwell East. A 2025 memo naming Stairwell West is obsolete."
+    },
+    {
+      "id": "DVM08",
+      "kind": "fact",
+      "content": "Obsolete 2025 safety memo (do not follow): primary fire exit listed as Stairwell West."
+    },
+    {
+      "id": "DVM09",
+      "kind": "fact",
+      "content": "The Northriver sensor calibration code is CAL-4482."
+    },
+    {
+      "id": "DVM10",
+      "kind": "fact",
+      "content": "Visitor lounge tea is peppermint herbal; it is not the staff preferred tea."
+    },
+    {
+      "id": "DVM11",
+      "kind": "fact",
+      "content": "Northriver soft-start GPU allotment for March is 18 US dollars."
+    },
+    {
+      "id": "DVM12",
+      "kind": "fact",
+      "content": "Northriver soft-start GPU allotment for April is 22 US dollars."
+    },
+    {
+      "id": "DVM13",
+      "kind": "fact",
+      "content": "Northriver stores durable experiment notes in the Cedar Ledger binder only; no overnight visitor parking policy is recorded in the handbook."
+    },
+    {
+      "id": "DVM14",
+      "kind": "fact",
+      "content": "Distractor room note: room C-09 holds spare cables, not the badge printer."
+    },
+    {
+      "id": "DVP01",
+      "kind": "source_passage",
+      "content": "Northriver beverages sheet: keep oolong peach blend by the kettle for staff. Peppermint in the lounge is for visitors only."
+    },
+    {
+      "id": "DVP02",
+      "kind": "source_passage",
+      "content": "Archive access card: locker combination NR-A17; rotate only after written security notice."
+    },
+    {
+      "id": "DVP03",
+      "kind": "source_passage",
+      "content": "Visitor ops: temporary badge printing remains in room C-04. Room C-09 is cable storage."
+    },
+    {
+      "id": "DVP04",
+      "kind": "source_passage",
+      "content": "Open-bay quiet policy: weekdays, conversation volume drops at 21:00."
+    },
+    {
+      "id": "DVP05",
+      "kind": "source_passage",
+      "content": "Checkout policy update (2026-03-01): equipment may leave the bay for 90 minutes. Prior 60-minute rule is retired."
+    },
+    {
+      "id": "DVP06",
+      "kind": "source_passage",
+      "content": "Safety sheet revision: evaluation bay primary exit is Stairwell East. Ignore older Stairwell West wording."
+    },
+    {
+      "id": "DVP07",
+      "kind": "source_passage",
+      "content": "Instrument desk: enter calibration code CAL-4482 before each synthetic sensor warm-up."
+    },
+    {
+      "id": "DVP08",
+      "kind": "source_passage",
+      "content": "Soft-start ledger: March allotment 18 USD; April allotment 22 USD. These are operating budgets, not hardware purchases."
+    }
+  ]
+}

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from experiments.text_baseline.embeddings import DEFAULT_MODEL_REVISION, build_embedding_bundle
-from experiments.text_baseline.fixtures import DATA_DIR
+from experiments.text_baseline.fixtures import DATA_DIR, resolve_data_dir
 from experiments.text_baseline.hashing import canonical_json
 from experiments.text_baseline.import_responses import import_responses, load_json
 from experiments.text_baseline.io_guard import prepare_output_dir, refuse_existing
@@ -17,13 +17,23 @@ from experiments.text_baseline.run_builder import build_requests, mock_record
 from experiments.text_baseline.runpod_launch import launch_bundle, launch_bundle_both
 
 
+def _resolve_args_data_dir(args: argparse.Namespace):
+    dataset = getattr(args, "dataset", None)
+    data_dir = getattr(args, "data_dir", None)
+    if dataset:
+        if data_dir and Path(data_dir).resolve() != DATA_DIR.resolve():
+            raise ValueError("use either --dataset or --data-dir, not both")
+        return resolve_data_dir(dataset=dataset)
+    return resolve_data_dir(data_dir=Path(data_dir) if data_dir else None)
+
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     refuse_existing(path)
     path.write_text(canonical_json(payload) + "\n", encoding="utf-8")
 
 
 def cmd_mock(args: argparse.Namespace) -> int:
-    bundle = build_requests(Path(args.data_dir), repeats=args.repeats, seed=args.seed)
+    bundle = build_requests(_resolve_args_data_dir(args), repeats=args.repeats, seed=args.seed)
     records = [mock_record(request) for request in bundle["requests"]]
     output = prepare_output_dir(Path(args.output))
     _write_json(output / "manifest.json", bundle["manifest"])
@@ -39,7 +49,7 @@ def cmd_mock(args: argparse.Namespace) -> int:
 
 
 def cmd_export(args: argparse.Namespace) -> int:
-    bundle = build_requests(Path(args.data_dir), repeats=args.repeats, seed=args.seed)
+    bundle = build_requests(_resolve_args_data_dir(args), repeats=args.repeats, seed=args.seed)
     output = prepare_output_dir(Path(args.output))
     _write_json(output / "manifest.json", bundle["manifest"])
     _write_json(output / "requests.json", {"requests": bundle["requests"]})
@@ -103,7 +113,7 @@ def cmd_run_live(args: argparse.Namespace) -> int:
 
 def cmd_prepare_embeddings(args: argparse.Namespace) -> int:
     bundle = build_embedding_bundle(
-        Path(args.data_dir),
+        _resolve_args_data_dir(args),
         model_id=args.model_id,
         model_revision=args.model_revision,
     )
@@ -140,7 +150,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Fixed text-baseline harness. Mock output is not a research result.",
     )
-    parser.add_argument("--data-dir", default=str(DATA_DIR))
+    parser.add_argument(
+        "--data-dir",
+        default=str(DATA_DIR),
+        help="Fixture directory. Default is the legacy twelve-question pilot under data/.",
+    )
+    parser.add_argument(
+        "--dataset",
+        choices=("benchmark-v2-dev", "benchmark-v2-eval"),
+        help="Named benchmark-v2 dataset under datasets/. Mutually exclusive with a custom --data-dir override intent.",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     mock = sub.add_parser("mock")
